@@ -12,6 +12,14 @@ void error_callback(int error, const char *description)
   std::cout << description << std::endl;
 }
 
+void process_input(GLFWwindow *window)
+{
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+  {
+    glfwSetWindowShouldClose(window, true);
+  }
+}
+
 int main()
 {
   glfwInit();
@@ -45,6 +53,7 @@ int main()
 
   while (!glfwWindowShouldClose(window))
   {
+    process_input(window);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
