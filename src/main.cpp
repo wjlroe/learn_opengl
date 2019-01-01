@@ -20,6 +20,12 @@ void process_input(GLFWwindow *window)
   }
 }
 
+void render()
+{
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
 int main()
 {
   glfwInit();
@@ -54,6 +60,7 @@ int main()
   while (!glfwWindowShouldClose(window))
   {
     process_input(window);
+    render();
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
