@@ -9,10 +9,11 @@ struct DrawResources
   unsigned int texture2;
 };
 
-void FramebufferSizeCallback(GLFWwindow *Window, int Width, int Height)
+struct WindowState
 {
-  glViewport(0, 0, Width, Height);
-}
+  int Width;
+  int Height;
+};
 
 void ErrorCallback(int Error, const char *Description)
 {
@@ -198,8 +199,6 @@ int main()
 
   glViewport(0, 0, 800, 600);
 
-  glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
-
   Shader SimpleShader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
   stbi_set_flip_vertically_on_load(true);
@@ -212,8 +211,19 @@ int main()
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
 
+  WindowState WindowState = {};
+  int WindowWidth, WindowHeight;
+
   while (!glfwWindowShouldClose(Window))
   {
+    glfwGetFramebufferSize(Window, &WindowWidth, &WindowHeight);
+    if ((WindowWidth != WindowState.Width) || (WindowHeight != WindowState.Height))
+    {
+      glViewport(0, 0, WindowWidth, WindowHeight);
+      WindowState.Width = WindowWidth;
+      WindowState.Height = WindowHeight;
+    }
+
     ProcessInput(Window);
     Render(SimpleShader, Resources);
     glfwSwapBuffers(Window);
