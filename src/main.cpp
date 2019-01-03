@@ -6,6 +6,7 @@ struct DrawResources
   unsigned int VBO;
   unsigned int EBO;
   unsigned int texture1;
+  unsigned int texture2;
 };
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -89,7 +90,12 @@ void LoadTexture(unsigned int TextureUnit, unsigned int *Texture, const char *Te
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
+    unsigned int Format = GL_RGB;
+    if (NumChannels == 4)
+    {
+      Format = GL_RGBA;
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
@@ -106,11 +112,15 @@ void drawRectangle(Shader shader, DrawResources Resources)
 
   shader.use();
 
-  shader.setVec4("ourColor", 0.0f, greenValue, 0.0f, 1.0f);
-
   if (Resources.texture1)
   {
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, Resources.texture1);
+  }
+  if (Resources.texture2)
+  {
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
   }
 
   glBindVertexArray(Resources.VAO);
@@ -175,8 +185,15 @@ int main()
 
   Shader shader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
+  stbi_set_flip_vertically_on_load(true);
+
   DrawResources resources = setupDrawResources();
   LoadTexture(GL_TEXTURE0, &resources.texture1, "../assets/container.jpg");
+  LoadTexture(GL_TEXTURE1, &resources.texture2, "../assets/awesomeface.png");
+
+  shader.use();
+  shader.setInt("texture1", 0);
+  shader.setInt("texture2", 1);
 
   while (!glfwWindowShouldClose(window))
   {
