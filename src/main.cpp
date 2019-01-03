@@ -120,16 +120,31 @@ void DrawRectangle(Shader SimpleShader, DrawResources Resources)
     glBindTexture(GL_TEXTURE_2D, Resources.texture2);
   }
 
-  glm::mat4 TranslationMatrix = glm::mat4(1.0f);
-  TranslationMatrix = glm::translate(TranslationMatrix, glm::vec3(0.5f, -0.5f, 0.0f));
-  TranslationMatrix = glm::rotate(TranslationMatrix, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-  SimpleShader.setMat4("transform", TranslationMatrix);
-
   glBindVertexArray(Resources.VAO);
+
   // Draw in wireframe mode
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  int NumTriangles = 6;
-  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+
+  {
+    glm::mat4 TranslationMatrix = glm::mat4(1.0f);
+    TranslationMatrix = glm::translate(TranslationMatrix, glm::vec3(0.5f, -0.5f, 0.0f));
+    TranslationMatrix = glm::rotate(TranslationMatrix, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+    SimpleShader.setMat4("transform", TranslationMatrix);
+
+    int NumTriangles = 6;
+    glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+  }
+
+  {
+    glm::mat4 TranslationMatrix = glm::mat4(1.0f);
+    TranslationMatrix = glm::translate(TranslationMatrix, glm::vec3(-0.5f, 0.5f, 0.0f));
+    float ScaleFactor = abs(sin(glfwGetTime()));
+    TranslationMatrix = glm::scale(TranslationMatrix, glm::vec3(ScaleFactor, ScaleFactor, 0.0f));
+    SimpleShader.setMat4("transform", TranslationMatrix);
+
+    int NumTriangles = 6;
+    glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+  }
 }
 
 void Render(Shader shader, DrawResources Resources)
