@@ -1,5 +1,58 @@
 #include "common.h"
 
+static float QuadVertices[] = {
+    0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
+    0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+    -0.5f, 0.5f, 0.0f, 0.0f, 1.0f}; // top left
+
+static unsigned int QuadIndices[] = {
+    0, 1, 3,
+    1, 2, 3};
+
+// clang-format off
+static float CubeVertices[] = {
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+};
+// clang-format on
+
+static unsigned int CubeIndices[] = {
+    0, 1, 2, 2, 3, 0,       // top
+    4, 5, 6, 6, 7, 4,       // bottom
+    8, 9, 10, 10, 11, 8,    // right
+    12, 13, 14, 14, 15, 12, // left
+    16, 17, 18, 18, 19, 16, // front
+    20, 21, 22, 22, 23, 20, // back
+};
+
 struct DrawResources
 {
   unsigned int VAO;
@@ -28,17 +81,8 @@ void ProcessInput(GLFWwindow *Window)
   }
 }
 
-DrawResources SetupDrawResources()
+DrawResources SetupQuadResources()
 {
-  float Vertices[] = {
-      0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
-      0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-      -0.5f, 0.5f, 0.0f, 0.0f, 1.0f}; // top left
-  unsigned int Indices[] = {
-      0, 1, 3,
-      1, 2, 3};
-
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
 
@@ -48,13 +92,52 @@ DrawResources SetupDrawResources()
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVertices), QuadVertices, GL_STATIC_DRAW);
 
   unsigned int EBO;
   glGenBuffers(1, &EBO);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(QuadIndices), QuadIndices, GL_STATIC_DRAW);
+
+  int aPosLocation = 0;
+  int aPosSize = 3;
+  int aTexLocation = 1;
+  int aTexSize = 2;
+
+  glVertexAttribPointer(aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(aPosLocation);
+  glVertexAttribPointer(aTexLocation, aTexSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(aTexLocation);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  DrawResources Resources = {};
+  Resources.VAO = VAO;
+  Resources.VBO = VBO;
+  Resources.EBO = EBO;
+  return Resources;
+}
+
+DrawResources SetupCubeResources()
+{
+  unsigned int VAO;
+  glGenVertexArrays(1, &VAO);
+
+  unsigned int VBO;
+  glGenBuffers(1, &VBO);
+
+  glBindVertexArray(VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
+
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(CubeIndices), CubeIndices, GL_STATIC_DRAW);
 
   int aPosLocation = 0;
   int aPosSize = 3;
@@ -130,12 +213,34 @@ void DrawRectangle(Shader SimpleShader, DrawResources Resources)
   glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
 }
 
-void Render(Shader shader, DrawResources Resources)
+void DrawCube(Shader SimpleShader, DrawResources Resources)
+{
+  SimpleShader.use();
+
+  if (Resources.texture1)
+  {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
+  }
+  if (Resources.texture2)
+  {
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
+  }
+
+  glBindVertexArray(Resources.VAO);
+
+  int NumTriangles = 36;
+  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+}
+
+void Render(Shader Shader, DrawResources QuadResources, DrawResources CubeResources)
 {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  DrawRectangle(shader, Resources);
+  // DrawRectangle(Shader, QuadResources);
+  DrawCube(Shader, CubeResources);
 }
 
 void CleanupDrawResources(DrawResources Resources)
@@ -173,29 +278,30 @@ int main()
     return -1;
   }
 
+  glEnable(GL_DEPTH_TEST);
+
   {
     int NumAttributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &NumAttributes);
     std::cout << "Max number of vertex attributes supported: " << NumAttributes << std::endl;
   }
 
-  glViewport(0, 0, 800, 600);
-
   Shader SimpleShader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
   stbi_set_flip_vertically_on_load(true);
 
-  DrawResources Resources = SetupDrawResources();
-  LoadTexture(GL_TEXTURE0, &Resources.texture1, "../assets/container.jpg");
-  LoadTexture(GL_TEXTURE1, &Resources.texture2, "../assets/awesomeface.png");
+  DrawResources QuadResources = SetupQuadResources();
+  LoadTexture(GL_TEXTURE0, &QuadResources.texture1, "../assets/container.jpg");
+  LoadTexture(GL_TEXTURE1, &QuadResources.texture2, "../assets/awesomeface.png");
+
+  DrawResources CubeResources = SetupCubeResources();
+  // FIXME: these aren't related to the DrawResources I don't think...
+  LoadTexture(GL_TEXTURE0, &CubeResources.texture1, "../assets/container.jpg");
+  LoadTexture(GL_TEXTURE1, &CubeResources.texture2, "../assets/awesomeface.png");
 
   SimpleShader.use();
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
-
-  glm::mat4 ModelMatrix = glm::mat4(1.0f);
-  ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-  SimpleShader.setMat4("model", ModelMatrix);
 
   glm::mat4 ViewMatrix = glm::mat4(1.0f);
   ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
@@ -208,6 +314,11 @@ int main()
 
   while (!glfwWindowShouldClose(Window))
   {
+    SimpleShader.use();
+    glm::mat4 ModelMatrix = glm::mat4(1.0f);
+    ModelMatrix = glm::rotate(ModelMatrix, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+    SimpleShader.setMat4("model", ModelMatrix);
+
     glfwGetFramebufferSize(Window, &WindowWidth, &WindowHeight);
     if ((WindowWidth != WindowState.Width) || (WindowHeight != WindowState.Height))
     {
@@ -221,12 +332,12 @@ int main()
     }
 
     ProcessInput(Window);
-    Render(SimpleShader, Resources);
+    Render(SimpleShader, QuadResources, CubeResources);
     glfwSwapBuffers(Window);
     glfwPollEvents();
   }
 
-  CleanupDrawResources(Resources);
+  CleanupDrawResources(CubeResources);
 
   glfwTerminate();
   return 0;
