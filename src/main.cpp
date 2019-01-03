@@ -1,31 +1,4 @@
-#include <iostream>
-#include <math.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-static const char *vertexShaderSource = "#version 330 core \n\
-layout (location = 0) in vec3 aPos;\n\
-layout (location = 1) in vec3 aColor;\n\
-\n\
-out vec3 ourColor;\n\
-\n\
-void main() \n\
-{ \n\
-  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); \n\
-  ourColor = aColor;\n\
-} \n\
-";
-
-static const char *fragmentShaderSource = "#version 330 core\n\
-out vec4 FragColor;\n\
-\n\
-in vec3 ourColor;\n\
-\n\
-void main()\n\
-{\n\
-  FragColor = vec4(ourColor, 1.0);\n\
-}\n\
-";
+#include "common.h"
 
 struct DrawResources
 {
@@ -100,15 +73,14 @@ DrawResources setupDrawResources()
   return resources;
 }
 
-void drawRectangle(unsigned int shaderProgram, unsigned int VAO)
+void drawRectangle(Shader shader, unsigned int VAO)
 {
   float timeValue = glfwGetTime();
   float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-  int VertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
-  glUseProgram(shaderProgram);
+  shader.use();
 
-  glUniform4f(VertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+  shader.setVec4("ourColor", 0.0f, greenValue, 0.0f, 1.0f);
 
   glBindVertexArray(VAO);
   // Draw in wireframe mode
@@ -117,12 +89,12 @@ void drawRectangle(unsigned int shaderProgram, unsigned int VAO)
   glDrawElements(GL_TRIANGLES, numTriangles, GL_UNSIGNED_INT, 0);
 }
 
-void render(unsigned int shaderProgram, unsigned int VAO)
+void render(Shader shader, unsigned int VAO)
 {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  drawRectangle(shaderProgram, VAO);
+  drawRectangle(shader, VAO);
 }
 
 void cleanupDrawResources(DrawResources resources)
@@ -170,57 +142,14 @@ int main()
 
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  unsigned int vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-              << infoLog << std::endl;
-  }
-
-  unsigned int fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-              << infoLog << std::endl;
-  }
-
-  unsigned int shaderProgram;
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success)
-  {
-    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    std::cout << "ERROR::PROGRAM::LINK_FAILED\n"
-              << infoLog << std::endl;
-  }
-
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+  Shader shader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
   DrawResources resources = setupDrawResources();
 
   while (!glfwWindowShouldClose(window))
   {
     process_input(window);
-    render(shaderProgram, resources.VAO);
+    render(shader, resources.VAO);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
