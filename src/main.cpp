@@ -5,6 +5,7 @@ struct DrawResources
   unsigned int VAO;
   unsigned int VBO;
   unsigned int EBO;
+  unsigned int texture;
 };
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -28,10 +29,10 @@ void process_input(GLFWwindow *window)
 DrawResources setupDrawResources()
 {
   float vertices[] = {
-      0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // top right
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // bottom right
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom left
-      -0.5f, 0.5f, 0.0f, 0.5f, 0.5f, 0.5f}; // top left
+      0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
+      0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+      -0.5f, 0.5f, 0.0f, 0.0f, 1.0f}; // top left
   unsigned int indices[] = {
       0, 1, 3,
       1, 2, 3};
@@ -54,14 +55,14 @@ DrawResources setupDrawResources()
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   int aPosLocation = 0;
-  int aColorLocation = 1;
   int aPosSize = 3;
-  int aColorSize = 3;
+  int aTexLocation = 1;
+  int aTexSize = 2;
 
-  glVertexAttribPointer(aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(aPosLocation);
-  glVertexAttribPointer(aColorLocation, aColorSize, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(aColorLocation);
+  glVertexAttribPointer(aTexLocation, aTexSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(aTexLocation);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -73,7 +74,31 @@ DrawResources setupDrawResources()
   return resources;
 }
 
-void drawRectangle(Shader shader, unsigned int VAO)
+void LoadTexture(DrawResources *Resources, const char *TextureName)
+{
+  glGenTextures(1, &Resources->texture);
+  glBindTexture(GL_TEXTURE_2D, Resources->texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  int Width, Height, NumChannels;
+  unsigned char *Data = stbi_load(TextureName, &Width, &Height, &NumChannels, 0);
+  if (Data)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  else
+  {
+    std::cout << "Failed to load texture" << std::endl;
+  }
+  stbi_image_free(Data);
+}
+
+void drawRectangle(Shader shader, DrawResources Resources)
 {
   float timeValue = glfwGetTime();
   float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
@@ -82,19 +107,24 @@ void drawRectangle(Shader shader, unsigned int VAO)
 
   shader.setVec4("ourColor", 0.0f, greenValue, 0.0f, 1.0f);
 
-  glBindVertexArray(VAO);
+  if (Resources.texture)
+  {
+    glBindTexture(GL_TEXTURE_2D, Resources.texture);
+  }
+
+  glBindVertexArray(Resources.VAO);
   // Draw in wireframe mode
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   int numTriangles = 6;
   glDrawElements(GL_TRIANGLES, numTriangles, GL_UNSIGNED_INT, 0);
 }
 
-void render(Shader shader, unsigned int VAO)
+void render(Shader shader, DrawResources Resources)
 {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  drawRectangle(shader, VAO);
+  drawRectangle(shader, Resources);
 }
 
 void cleanupDrawResources(DrawResources resources)
@@ -145,11 +175,12 @@ int main()
   Shader shader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
   DrawResources resources = setupDrawResources();
+  LoadTexture(&resources, "../assets/container.jpg");
 
   while (!glfwWindowShouldClose(window))
   {
     process_input(window);
-    render(shader, resources.VAO);
+    render(shader, resources);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
