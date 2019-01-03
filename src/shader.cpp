@@ -26,7 +26,7 @@ struct Shader
       VertexCode = vShaderStream.str();
       FragmentCode = fShaderStream.str();
     }
-    catch (std::ifstream::failure e)
+    catch (const std::ifstream::failure &e)
     {
       std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
