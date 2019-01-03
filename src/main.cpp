@@ -126,26 +126,8 @@ void DrawRectangle(Shader SimpleShader, DrawResources Resources)
   // Draw in wireframe mode
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  {
-    glm::mat4 TranslationMatrix = glm::mat4(1.0f);
-    TranslationMatrix = glm::translate(TranslationMatrix, glm::vec3(0.5f, -0.5f, 0.0f));
-    TranslationMatrix = glm::rotate(TranslationMatrix, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-    SimpleShader.setMat4("transform", TranslationMatrix);
-
-    int NumTriangles = 6;
-    glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
-  }
-
-  {
-    glm::mat4 TranslationMatrix = glm::mat4(1.0f);
-    TranslationMatrix = glm::translate(TranslationMatrix, glm::vec3(-0.5f, 0.5f, 0.0f));
-    float ScaleFactor = abs(sin(glfwGetTime()));
-    TranslationMatrix = glm::scale(TranslationMatrix, glm::vec3(ScaleFactor, ScaleFactor, 0.0f));
-    SimpleShader.setMat4("transform", TranslationMatrix);
-
-    int NumTriangles = 6;
-    glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
-  }
+  int NumTriangles = 6;
+  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
 }
 
 void Render(Shader shader, DrawResources Resources)
@@ -211,6 +193,16 @@ int main()
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
 
+  glm::mat4 ModelMatrix = glm::mat4(1.0f);
+  ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  SimpleShader.setMat4("model", ModelMatrix);
+
+  glm::mat4 ViewMatrix = glm::mat4(1.0f);
+  ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
+  SimpleShader.setMat4("view", ViewMatrix);
+
+  glm::mat4 ProjectionMatrix;
+
   WindowState WindowState = {};
   int WindowWidth, WindowHeight;
 
@@ -219,6 +211,10 @@ int main()
     glfwGetFramebufferSize(Window, &WindowWidth, &WindowHeight);
     if ((WindowWidth != WindowState.Width) || (WindowHeight != WindowState.Height))
     {
+      SimpleShader.use();
+      ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)(WindowWidth / WindowHeight), 0.1f, 100.0f);
+      SimpleShader.setMat4("projection", ProjectionMatrix);
+
       glViewport(0, 0, WindowWidth, WindowHeight);
       WindowState.Width = WindowWidth;
       WindowState.Height = WindowHeight;
