@@ -117,4 +117,14 @@ struct Shader
   {
     glUniform4f(glGetUniformLocation(ID, Name), x, y, z, w);
   }
+
+  void setVec4(const char *Name, const glm::vec4 &Value) const
+  {
+    glUniform4fv(glGetUniformLocation(ID, Name), 1, &Value[0]);
+  }
+
+  void setMat4(const char *Name, const glm::mat4 &Matrix) const
+  {
+    glUniformMatrix4fv(glGetUniformLocation(ID, Name), 1, GL_FALSE, &Matrix[0][0]);
+  }
 };

@@ -192,6 +192,13 @@ int main()
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
 
+  {
+    glm::mat4 TranslationMatrix = glm::mat4(1.0f);
+    TranslationMatrix = glm::rotate(TranslationMatrix, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    TranslationMatrix = glm::scale(TranslationMatrix, glm::vec3(0.5, 0.5, 0.5));
+    SimpleShader.setMat4("transform", TranslationMatrix);
+  }
+
   while (!glfwWindowShouldClose(Window))
   {
     ProcessInput(Window);
