@@ -20,6 +20,13 @@ void main()\n\
 }\n\
 ";
 
+struct DrawResources
+{
+  unsigned int VAO;
+  unsigned int VBO;
+  unsigned int EBO;
+};
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
   glViewport(0, 0, width, height);
@@ -38,7 +45,7 @@ void process_input(GLFWwindow *window)
   }
 }
 
-unsigned int setupVAO()
+DrawResources setupDrawResources()
 {
   float vertices[] = {
       0.5f, 0.5f, 0.0f,   // top right
@@ -75,7 +82,11 @@ unsigned int setupVAO()
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  return VAO;
+  DrawResources resources = {};
+  resources.VAO = VAO;
+  resources.VBO = VBO;
+  resources.EBO = EBO;
+  return resources;
 }
 
 void drawRectangle(unsigned int shaderProgram, unsigned int VAO)
@@ -94,6 +105,13 @@ void render(unsigned int shaderProgram, unsigned int VAO)
   glClear(GL_COLOR_BUFFER_BIT);
 
   drawRectangle(shaderProgram, VAO);
+}
+
+void cleanupDrawResources(DrawResources resources)
+{
+  glDeleteVertexArrays(1, &resources.VAO);
+  glDeleteBuffers(1, &resources.VBO);
+  glDeleteBuffers(1, &resources.EBO);
 }
 
 int main()
@@ -173,15 +191,17 @@ int main()
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  unsigned int VAO = setupVAO();
+  DrawResources resources = setupDrawResources();
 
   while (!glfwWindowShouldClose(window))
   {
     process_input(window);
-    render(shaderProgram, VAO);
+    render(shaderProgram, resources.VAO);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
+
+  cleanupDrawResources(resources);
 
   glfwTerminate();
   return 0;
