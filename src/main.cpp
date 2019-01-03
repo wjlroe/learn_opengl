@@ -5,7 +5,7 @@ struct DrawResources
   unsigned int VAO;
   unsigned int VBO;
   unsigned int EBO;
-  unsigned int texture;
+  unsigned int texture1;
 };
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -74,20 +74,21 @@ DrawResources setupDrawResources()
   return resources;
 }
 
-void LoadTexture(DrawResources *Resources, const char *TextureName)
+void LoadTexture(unsigned int TextureUnit, unsigned int *Texture, const char *TextureName)
 {
-  glGenTextures(1, &Resources->texture);
-  glBindTexture(GL_TEXTURE_2D, Resources->texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
   int Width, Height, NumChannels;
   unsigned char *Data = stbi_load(TextureName, &Width, &Height, &NumChannels, 0);
   if (Data)
   {
+    glActiveTexture(TextureUnit);
+    glGenTextures(1, Texture);
+    glBindTexture(GL_TEXTURE_2D, *Texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
@@ -107,9 +108,9 @@ void drawRectangle(Shader shader, DrawResources Resources)
 
   shader.setVec4("ourColor", 0.0f, greenValue, 0.0f, 1.0f);
 
-  if (Resources.texture)
+  if (Resources.texture1)
   {
-    glBindTexture(GL_TEXTURE_2D, Resources.texture);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
   }
 
   glBindVertexArray(Resources.VAO);
@@ -175,7 +176,7 @@ int main()
   Shader shader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
   DrawResources resources = setupDrawResources();
-  LoadTexture(&resources, "../assets/container.jpg");
+  LoadTexture(GL_TEXTURE0, &resources.texture1, "../assets/container.jpg");
 
   while (!glfwWindowShouldClose(window))
   {
