@@ -9,32 +9,32 @@ struct DrawResources
   unsigned int texture2;
 };
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void FramebufferSizeCallback(GLFWwindow *Window, int Width, int Height)
 {
-  glViewport(0, 0, width, height);
+  glViewport(0, 0, Width, Height);
 }
 
-void error_callback(int error, const char *description)
+void ErrorCallback(int Error, const char *Description)
 {
-  std::cout << description << std::endl;
+  std::cout << Description << std::endl;
 }
 
-void process_input(GLFWwindow *window)
+void ProcessInput(GLFWwindow *Window)
 {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+  if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
   {
-    glfwSetWindowShouldClose(window, true);
+    glfwSetWindowShouldClose(Window, true);
   }
 }
 
-DrawResources setupDrawResources()
+DrawResources SetupDrawResources()
 {
-  float vertices[] = {
+  float Vertices[] = {
       0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
       0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
       -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
       -0.5f, 0.5f, 0.0f, 0.0f, 1.0f}; // top left
-  unsigned int indices[] = {
+  unsigned int Indices[] = {
       0, 1, 3,
       1, 2, 3};
 
@@ -47,13 +47,13 @@ DrawResources setupDrawResources()
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
 
   unsigned int EBO;
   glGenBuffers(1, &EBO);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 
   int aPosLocation = 0;
   int aPosSize = 3;
@@ -68,11 +68,11 @@ DrawResources setupDrawResources()
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  DrawResources resources = {};
-  resources.VAO = VAO;
-  resources.VBO = VBO;
-  resources.EBO = EBO;
-  return resources;
+  DrawResources Resources = {};
+  Resources.VAO = VAO;
+  Resources.VBO = VBO;
+  Resources.EBO = EBO;
+  return Resources;
 }
 
 void LoadTexture(unsigned int TextureUnit, unsigned int *Texture, const char *TextureName)
@@ -105,12 +105,9 @@ void LoadTexture(unsigned int TextureUnit, unsigned int *Texture, const char *Te
   stbi_image_free(Data);
 }
 
-void drawRectangle(Shader shader, DrawResources Resources)
+void DrawRectangle(Shader SimpleShader, DrawResources Resources)
 {
-  float timeValue = glfwGetTime();
-  float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-
-  shader.use();
+  SimpleShader.use();
 
   if (Resources.texture1)
   {
@@ -126,29 +123,29 @@ void drawRectangle(Shader shader, DrawResources Resources)
   glBindVertexArray(Resources.VAO);
   // Draw in wireframe mode
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  int numTriangles = 6;
-  glDrawElements(GL_TRIANGLES, numTriangles, GL_UNSIGNED_INT, 0);
+  int NumTriangles = 6;
+  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
 }
 
-void render(Shader shader, DrawResources Resources)
+void Render(Shader shader, DrawResources Resources)
 {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  drawRectangle(shader, Resources);
+  DrawRectangle(shader, Resources);
 }
 
-void cleanupDrawResources(DrawResources resources)
+void CleanupDrawResources(DrawResources Resources)
 {
-  glDeleteVertexArrays(1, &resources.VAO);
-  glDeleteBuffers(1, &resources.VBO);
-  glDeleteBuffers(1, &resources.EBO);
+  glDeleteVertexArrays(1, &Resources.VAO);
+  glDeleteBuffers(1, &Resources.VBO);
+  glDeleteBuffers(1, &Resources.EBO);
 }
 
 int main()
 {
   glfwInit();
-  glfwSetErrorCallback(error_callback);
+  glfwSetErrorCallback(ErrorCallback);
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -158,14 +155,14 @@ int main()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-  if (window == NULL)
+  GLFWwindow *Window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+  if (Window == NULL)
   {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return -1;
   }
-  glfwMakeContextCurrent(window);
+  glfwMakeContextCurrent(Window);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
@@ -181,29 +178,29 @@ int main()
 
   glViewport(0, 0, 800, 600);
 
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
 
-  Shader shader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
+  Shader SimpleShader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
 
   stbi_set_flip_vertically_on_load(true);
 
-  DrawResources resources = setupDrawResources();
-  LoadTexture(GL_TEXTURE0, &resources.texture1, "../assets/container.jpg");
-  LoadTexture(GL_TEXTURE1, &resources.texture2, "../assets/awesomeface.png");
+  DrawResources Resources = SetupDrawResources();
+  LoadTexture(GL_TEXTURE0, &Resources.texture1, "../assets/container.jpg");
+  LoadTexture(GL_TEXTURE1, &Resources.texture2, "../assets/awesomeface.png");
 
-  shader.use();
-  shader.setInt("texture1", 0);
-  shader.setInt("texture2", 1);
+  SimpleShader.use();
+  SimpleShader.setInt("texture1", 0);
+  SimpleShader.setInt("texture2", 1);
 
-  while (!glfwWindowShouldClose(window))
+  while (!glfwWindowShouldClose(Window))
   {
-    process_input(window);
-    render(shader, resources);
-    glfwSwapBuffers(window);
+    ProcessInput(Window);
+    Render(SimpleShader, Resources);
+    glfwSwapBuffers(Window);
     glfwPollEvents();
   }
 
-  cleanupDrawResources(resources);
+  CleanupDrawResources(Resources);
 
   glfwTerminate();
   return 0;
