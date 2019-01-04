@@ -239,8 +239,22 @@ void Render(Shader Shader, DrawResources QuadResources, DrawResources CubeResour
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  Shader.use();
   // DrawRectangle(Shader, QuadResources);
-  DrawCube(Shader, CubeResources);
+  glm::vec3 CubePositions[] = {
+      glm::vec3(0.0f, 0.0f, 0.0f),
+      glm::vec3(2.0f, 5.0f, -15.0f)};
+  int i = 0;
+  for (glm::vec3 CubePosition : CubePositions)
+  {
+    float Angle = 20.0f * i;
+    glm::mat4 ModelMatrix = glm::mat4(1.0f);
+    ModelMatrix = glm::translate(ModelMatrix, CubePosition);
+    ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
+    Shader.setMat4("model", ModelMatrix);
+    DrawCube(Shader, CubeResources);
+    ++i;
+  }
 }
 
 void CleanupDrawResources(DrawResources Resources)
@@ -314,11 +328,6 @@ int main()
 
   while (!glfwWindowShouldClose(Window))
   {
-    SimpleShader.use();
-    glm::mat4 ModelMatrix = glm::mat4(1.0f);
-    ModelMatrix = glm::rotate(ModelMatrix, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    SimpleShader.setMat4("model", ModelMatrix);
-
     glfwGetFramebufferSize(Window, &WindowWidth, &WindowHeight);
     if ((WindowWidth != WindowState.Width) || (WindowHeight != WindowState.Height))
     {
