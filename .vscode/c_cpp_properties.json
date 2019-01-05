@@ -10,6 +10,23 @@
       "cStandard": "c11",
       "cppStandard": "c++17",
       "intelliSenseMode": "clang-x64"
+    },
+    {
+      "name": "Win32",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "C:\\glfw-3.2.1.bin.WIN64\\include"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}",
+          "C:\\glfw-3.2.1.bin.WIN64\\include"
+        ]
+      },
+      "defines": [],
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "msvc-x64"
     }
   ],
   "version": 4

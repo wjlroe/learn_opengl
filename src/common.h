@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include <glad/glad.h>
+#define GLFW_DLL
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,4 +18,5 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "glad.c"
 #include "shader.cpp"
