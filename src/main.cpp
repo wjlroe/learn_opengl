@@ -326,7 +326,7 @@ int main()
   SimpleShader.setInt("texture2", 1);
 
   glm::mat4 ViewMatrix = glm::mat4(1.0f);
-  ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
+  ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -4.0f));
   SimpleShader.setMat4("view", ViewMatrix);
 
   glm::mat4 ProjectionMatrix;
