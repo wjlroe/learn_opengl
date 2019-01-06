@@ -68,6 +68,7 @@ struct CameraState
 {
   float Yaw;
   float Pitch;
+  float FOV;
   glm::vec3 Position;
   glm::vec3 Front;
   glm::vec3 Up;
@@ -88,6 +89,20 @@ struct WindowState
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
 };
+
+struct MouseScrollState
+{
+  double XOffset;
+  double YOffset;
+};
+
+static struct MouseScrollState MouseScrollState = {};
+
+void ScrollCallback(GLFWwindow *Window, double XOffset, double YOffset)
+{
+  MouseScrollState.XOffset = XOffset;
+  MouseScrollState.YOffset = YOffset;
+}
 
 void ErrorCallback(int Error, const char *Description)
 {
@@ -143,8 +158,6 @@ void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
   XOffset *= MouseSensitivity;
   YOffset *= MouseSensitivity;
 
-  std::cout << "XOffset: " << XOffset << " YOffset: " << YOffset << std::endl;
-
   Camera->Yaw += XOffset;
   Camera->Pitch += YOffset;
 
@@ -155,6 +168,19 @@ void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
   if (Camera->Pitch < -89.0f)
   {
     Camera->Pitch = -89.0f;
+  }
+
+  if (Camera->FOV >= 1.0f && Camera->FOV <= 45.0f)
+  {
+    Camera->FOV -= MouseScrollState.YOffset;
+  }
+  if (Camera->FOV <= 1.0f)
+  {
+    Camera->FOV = 1.0f;
+  }
+  if (Camera->FOV >= 45.0f)
+  {
+    Camera->FOV = 45.0f;
   }
 }
 
@@ -383,6 +409,7 @@ int main()
     return -1;
   }
 
+  glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   glEnable(GL_DEPTH_TEST);
@@ -421,6 +448,7 @@ int main()
   WindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
   {
     CameraState CameraState = {};
+    CameraState.FOV = 45.0f;
     CameraState.Position = glm::vec3(0.0f, 0.0f, 3.0f);
     CameraState.Front = glm::vec3(0.0f, 0.0f, -1.0f);
     CameraState.Up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -453,16 +481,13 @@ int main()
       SimpleShader.setMat4("view", ViewMatrix);
     }
 
-    glfwGetFramebufferSize(Window, &WindowWidth, &WindowHeight);
-    if ((WindowWidth != WindowState.Width) || (WindowHeight != WindowState.Height))
+    glfwGetFramebufferSize(Window, &WindowState.Width, &WindowState.Height);
     {
       SimpleShader.use();
-      ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / (float)WindowHeight, 0.1f, 100.0f);
+      ProjectionMatrix = glm::perspective(glm::radians(WindowState.CameraState.FOV), (float)WindowState.Width / (float)WindowState.Height, 0.1f, 100.0f);
       SimpleShader.setMat4("projection", ProjectionMatrix);
 
-      glViewport(0, 0, WindowWidth, WindowHeight);
-      WindowState.Width = WindowWidth;
-      WindowState.Height = WindowHeight;
+      glViewport(0, 0, WindowState.Width, WindowState.Height);
     }
 
     ProcessInput(Window, &WindowState, DeltaTime);
