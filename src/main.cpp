@@ -256,6 +256,10 @@ void Render(Shader Shader, DrawResources QuadResources, DrawResources CubeResour
   for (glm::vec3 CubePosition : CubePositions)
   {
     float Angle = 20.0f * i;
+    if (i % 2 == 0)
+    {
+      Angle += glfwGetTime() * 25.0f;
+    }
     glm::mat4 ModelMatrix = glm::mat4(1.0f);
     ModelMatrix = glm::translate(ModelMatrix, CubePosition);
     ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
