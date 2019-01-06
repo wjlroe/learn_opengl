@@ -1,17 +1,17 @@
 #include "common.h"
 
-static float QuadVertices[] = {
+static const float QuadVertices[] = {
     0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
     0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
     -0.5f, 0.5f, 0.0f, 0.0f, 1.0f}; // top left
 
-static unsigned int QuadIndices[] = {
+static const unsigned int QuadIndices[] = {
     0, 1, 3,
     1, 2, 3};
 
 // clang-format off
-static float CubeVertices[] = {
+static const float CubeVertices[] = {
     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
@@ -44,7 +44,7 @@ static float CubeVertices[] = {
 };
 // clang-format on
 
-static unsigned int CubeIndices[] = {
+static const unsigned int CubeIndices[] = {
     0, 1, 2, 2, 3, 0,       // top
     4, 5, 6, 6, 7, 4,       // bottom
     8, 9, 10, 10, 11, 8,    // right
