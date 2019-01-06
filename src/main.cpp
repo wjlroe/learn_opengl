@@ -329,10 +329,7 @@ int main()
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
 
-  glm::mat4 ViewMatrix = glm::mat4(1.0f);
-  ViewMatrix = glm::translate(ViewMatrix, glm::vec3(0.0f, 0.0f, -4.0f));
-  SimpleShader.setMat4("view", ViewMatrix);
-
+  glm::mat4 ViewMatrix;
   glm::mat4 ProjectionMatrix;
 
   WindowState WindowState = {};
@@ -340,11 +337,23 @@ int main()
 
   while (!glfwWindowShouldClose(Window))
   {
+    {
+      float Radius = 10.0f;
+      float CamX = sin(glfwGetTime()) * Radius;
+      float CamZ = cos(glfwGetTime()) * Radius;
+      glm::vec3 Eye = glm::vec3(CamX, 0.0f, CamZ);
+      glm::vec3 Center = glm::vec3(0.0f, 0.0f, 0.0f);
+      glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
+      ViewMatrix = glm::lookAt(Eye, Center, Up);
+      SimpleShader.use();
+      SimpleShader.setMat4("view", ViewMatrix);
+    }
+
     glfwGetFramebufferSize(Window, &WindowWidth, &WindowHeight);
     if ((WindowWidth != WindowState.Width) || (WindowHeight != WindowState.Height))
     {
       SimpleShader.use();
-      ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)(WindowWidth / WindowHeight), 0.1f, 100.0f);
+      ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / (float)WindowHeight, 0.1f, 100.0f);
       SimpleShader.setMat4("projection", ProjectionMatrix);
 
       glViewport(0, 0, WindowWidth, WindowHeight);
