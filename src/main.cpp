@@ -53,7 +53,7 @@ static unsigned int CubeIndices[] = {
     20, 21, 22, 22, 23, 20, // back
 };
 
-static const float CAMERA_SPEED = 0.05f;
+static const float CAMERA_SPEED_MULTIPLIER = 2.5f;
 
 struct DrawResources
 {
@@ -83,33 +83,35 @@ void ErrorCallback(int Error, const char *Description)
   std::cout << Description << std::endl;
 }
 
-void ProcessInput(GLFWwindow *Window, WindowState *WindowState)
+void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
 {
   if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
   {
     glfwSetWindowShouldClose(Window, true);
   }
 
+  float CameraSpeed = CAMERA_SPEED_MULTIPLIER * DeltaTime;
+
   CameraState *Camera = &WindowState->CameraState;
 
   if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
   {
-    Camera->Position += CAMERA_SPEED * Camera->Front;
+    Camera->Position += CameraSpeed * Camera->Front;
   }
 
   if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
   {
-    Camera->Position -= CAMERA_SPEED * Camera->Front;
+    Camera->Position -= CameraSpeed * Camera->Front;
   }
 
   if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
   {
-    Camera->Position -= glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CAMERA_SPEED;
+    Camera->Position -= glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CameraSpeed;
   }
 
   if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
   {
-    Camera->Position += glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CAMERA_SPEED;
+    Camera->Position += glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CameraSpeed;
   }
 }
 
@@ -374,8 +376,15 @@ int main()
   }
   int WindowWidth, WindowHeight;
 
+  float DeltaTime = 0.0f;
+  float LastFrame = 0.0f;
+
   while (!glfwWindowShouldClose(Window))
   {
+    float CurrentFrame = glfwGetTime();
+    DeltaTime = CurrentFrame - LastFrame;
+    LastFrame = CurrentFrame;
+
     {
       ViewMatrix = glm::lookAt(WindowState.CameraState.Position, WindowState.CameraState.Position + WindowState.CameraState.Front, WindowState.CameraState.Up);
       SimpleShader.use();
@@ -394,7 +403,7 @@ int main()
       WindowState.Height = WindowHeight;
     }
 
-    ProcessInput(Window, &WindowState);
+    ProcessInput(Window, &WindowState, DeltaTime);
     Render(SimpleShader, QuadResources, CubeResources);
     glfwSwapBuffers(Window);
     glfwPollEvents();
