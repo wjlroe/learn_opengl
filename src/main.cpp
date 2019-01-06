@@ -53,6 +53,8 @@ static unsigned int CubeIndices[] = {
     20, 21, 22, 22, 23, 20, // back
 };
 
+static const float CAMERA_SPEED = 0.05f;
+
 struct DrawResources
 {
   unsigned int VAO;
@@ -62,10 +64,18 @@ struct DrawResources
   unsigned int texture2;
 };
 
+struct CameraState
+{
+  glm::vec3 Position;
+  glm::vec3 Front;
+  glm::vec3 Up;
+};
+
 struct WindowState
 {
   int Width;
   int Height;
+  CameraState CameraState;
 };
 
 void ErrorCallback(int Error, const char *Description)
@@ -73,11 +83,33 @@ void ErrorCallback(int Error, const char *Description)
   std::cout << Description << std::endl;
 }
 
-void ProcessInput(GLFWwindow *Window)
+void ProcessInput(GLFWwindow *Window, WindowState *WindowState)
 {
   if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
   {
     glfwSetWindowShouldClose(Window, true);
+  }
+
+  CameraState *Camera = &WindowState->CameraState;
+
+  if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
+  {
+    Camera->Position += CAMERA_SPEED * Camera->Front;
+  }
+
+  if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
+  {
+    Camera->Position -= CAMERA_SPEED * Camera->Front;
+  }
+
+  if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
+  {
+    Camera->Position -= glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CAMERA_SPEED;
+  }
+
+  if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
+  {
+    Camera->Position += glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CAMERA_SPEED;
   }
 }
 
@@ -333,18 +365,19 @@ int main()
   glm::mat4 ProjectionMatrix;
 
   WindowState WindowState = {};
+  {
+    CameraState CameraState = {};
+    CameraState.Position = glm::vec3(0.0f, 0.0f, 3.0f);
+    CameraState.Front = glm::vec3(0.0f, 0.0f, -1.0f);
+    CameraState.Up = glm::vec3(0.0f, 1.0f, 0.0f);
+    WindowState.CameraState = CameraState;
+  }
   int WindowWidth, WindowHeight;
 
   while (!glfwWindowShouldClose(Window))
   {
     {
-      float Radius = 10.0f;
-      float CamX = sin(glfwGetTime()) * Radius;
-      float CamZ = cos(glfwGetTime()) * Radius;
-      glm::vec3 Eye = glm::vec3(CamX, 0.0f, CamZ);
-      glm::vec3 Center = glm::vec3(0.0f, 0.0f, 0.0f);
-      glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
-      ViewMatrix = glm::lookAt(Eye, Center, Up);
+      ViewMatrix = glm::lookAt(WindowState.CameraState.Position, WindowState.CameraState.Position + WindowState.CameraState.Front, WindowState.CameraState.Up);
       SimpleShader.use();
       SimpleShader.setMat4("view", ViewMatrix);
     }
@@ -361,7 +394,7 @@ int main()
       WindowState.Height = WindowHeight;
     }
 
-    ProcessInput(Window);
+    ProcessInput(Window, &WindowState);
     Render(SimpleShader, QuadResources, CubeResources);
     glfwSwapBuffers(Window);
     glfwPollEvents();
