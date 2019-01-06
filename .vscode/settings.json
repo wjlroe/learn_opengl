@@ -1,0 +1,8 @@
+{
+  "files.exclude": {
+    "./include": true
+  },
+  "search.exclude": {
+    "include/**": true
+  }
+}
