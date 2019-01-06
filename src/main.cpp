@@ -66,9 +66,17 @@ struct DrawResources
 
 struct CameraState
 {
+  float Yaw;
+  float Pitch;
   glm::vec3 Position;
   glm::vec3 Front;
   glm::vec3 Up;
+};
+
+struct MouseState
+{
+  double X;
+  double Y;
 };
 
 struct WindowState
@@ -76,6 +84,9 @@ struct WindowState
   int Width;
   int Height;
   CameraState CameraState;
+  bool FirstMouseMove;
+  MouseState MouseLastFrame;
+  MouseState MouseCurrentFrame;
 };
 
 void ErrorCallback(int Error, const char *Description)
@@ -112,6 +123,38 @@ void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
   if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
   {
     Camera->Position += glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CameraSpeed;
+  }
+
+  WindowState->MouseLastFrame.X = WindowState->MouseCurrentFrame.X;
+  WindowState->MouseLastFrame.Y = WindowState->MouseCurrentFrame.Y;
+  glfwGetCursorPos(Window, &WindowState->MouseCurrentFrame.X, &WindowState->MouseCurrentFrame.Y);
+
+  if (WindowState->FirstMouseMove)
+  {
+    WindowState->MouseLastFrame.X = WindowState->MouseCurrentFrame.X;
+    WindowState->MouseLastFrame.Y = WindowState->MouseCurrentFrame.Y;
+    WindowState->FirstMouseMove = false;
+  }
+
+  float XOffset = WindowState->MouseCurrentFrame.X - WindowState->MouseLastFrame.X;
+  float YOffset = WindowState->MouseLastFrame.Y - WindowState->MouseCurrentFrame.Y;
+
+  float MouseSensitivity = 0.05f;
+  XOffset *= MouseSensitivity;
+  YOffset *= MouseSensitivity;
+
+  std::cout << "XOffset: " << XOffset << " YOffset: " << YOffset << std::endl;
+
+  Camera->Yaw += XOffset;
+  Camera->Pitch += YOffset;
+
+  if (Camera->Pitch > 89.0f)
+  {
+    Camera->Pitch = 89.0f;
+  }
+  if (Camera->Pitch < -89.0f)
+  {
+    Camera->Pitch = -89.0f;
   }
 }
 
@@ -323,7 +366,9 @@ int main()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  GLFWwindow *Window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+  int ScreenWidth = 800;
+  int ScreenHeight = 600;
+  GLFWwindow *Window = glfwCreateWindow(ScreenWidth, ScreenHeight, "LearnOpenGL", NULL, NULL);
   if (Window == NULL)
   {
     std::cout << "Failed to create GLFW window" << std::endl;
@@ -337,6 +382,8 @@ int main()
     std::cout << "Failed to initialize GLAD" << std::endl;
     return -1;
   }
+
+  glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -367,6 +414,11 @@ int main()
   glm::mat4 ProjectionMatrix;
 
   WindowState WindowState = {};
+  WindowState.FirstMouseMove = true;
+  WindowState.MouseCurrentFrame = {};
+  WindowState.MouseLastFrame = {};
+  WindowState.MouseCurrentFrame.X = ScreenWidth / 2;
+  WindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
   {
     CameraState CameraState = {};
     CameraState.Position = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -386,7 +438,17 @@ int main()
     LastFrame = CurrentFrame;
 
     {
-      ViewMatrix = glm::lookAt(WindowState.CameraState.Position, WindowState.CameraState.Position + WindowState.CameraState.Front, WindowState.CameraState.Up);
+      WindowState.CameraState.Front.x =
+          cos(glm::radians(WindowState.CameraState.Pitch)) * cos(glm::radians(WindowState.CameraState.Yaw));
+      WindowState.CameraState.Front.y = sin(glm::radians(WindowState.CameraState.Pitch));
+      WindowState.CameraState.Front.z =
+          cos(glm::radians(WindowState.CameraState.Pitch)) * sin(glm::radians(WindowState.CameraState.Yaw));
+      WindowState.CameraState.Front = glm::normalize(WindowState.CameraState.Front);
+      ViewMatrix = glm::lookAt(
+          WindowState.CameraState.Position,
+          WindowState.CameraState.Position + WindowState.CameraState.Front,
+          WindowState.CameraState.Up);
+
       SimpleShader.use();
       SimpleShader.setMat4("view", ViewMatrix);
     }
