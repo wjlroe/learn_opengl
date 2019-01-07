@@ -454,7 +454,6 @@ int main()
     CameraState.Up = glm::vec3(0.0f, 1.0f, 0.0f);
     WindowState.CameraState = CameraState;
   }
-  int WindowWidth, WindowHeight;
 
   float DeltaTime = 0.0f;
   float LastFrame = 0.0f;
