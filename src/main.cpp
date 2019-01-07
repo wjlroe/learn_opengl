@@ -84,7 +84,7 @@ struct WindowState
 {
   int Width;
   int Height;
-  CameraState CameraState;
+  struct CameraState CameraState;
   bool FirstMouseMove;
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
