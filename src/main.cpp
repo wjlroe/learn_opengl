@@ -68,77 +68,84 @@ struct MouseState
   double Y;
 };
 
-struct WindowState
-{
-  int Width;
-  int Height;
-  struct Camera Camera;
-  bool FirstMouseMove;
-  MouseState MouseLastFrame;
-  MouseState MouseCurrentFrame;
-};
-
 struct MouseScrollState
 {
   double XOffset;
   double YOffset;
 };
 
-static struct MouseScrollState MouseScrollState = {};
+struct WindowState
+{
+  GLFWwindow *Window;
+  int Width;
+  int Height;
+  struct Camera Camera;
+  bool FirstMouseMove;
+  MouseState MouseLastFrame;
+  MouseState MouseCurrentFrame;
+  struct MouseScrollState MouseScrollState;
+
+  void ProcessInput(float DeltaTime)
+  {
+    if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+      glfwSetWindowShouldClose(Window, true);
+    }
+
+    if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+      Camera.ProcessKeyboard(FORWARD, DeltaTime);
+    }
+    if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+      Camera.ProcessKeyboard(BACKWARD, DeltaTime);
+    }
+    if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+      Camera.ProcessKeyboard(LEFT, DeltaTime);
+    }
+    if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+      Camera.ProcessKeyboard(RIGHT, DeltaTime);
+    }
+
+    MouseLastFrame.X = MouseCurrentFrame.X;
+    MouseLastFrame.Y = MouseCurrentFrame.Y;
+    glfwGetCursorPos(Window, &MouseCurrentFrame.X, &MouseCurrentFrame.Y);
+
+    if (FirstMouseMove)
+    {
+      MouseLastFrame.X = MouseCurrentFrame.X;
+      MouseLastFrame.Y = MouseCurrentFrame.Y;
+      FirstMouseMove = false;
+    }
+
+    float XOffset = (float)MouseCurrentFrame.X - (float)MouseLastFrame.X;
+    float YOffset = (float)MouseLastFrame.Y - (float)MouseCurrentFrame.Y;
+
+    Camera.ProcessMouseMovement(XOffset, YOffset);
+    Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
+  }
+};
+
+static WindowState GlobalWindowState = {};
 
 void ScrollCallback(GLFWwindow *Window, double XOffset, double YOffset)
 {
-  MouseScrollState.XOffset = XOffset;
-  MouseScrollState.YOffset = YOffset;
+  GlobalWindowState.MouseScrollState.XOffset = XOffset;
+  GlobalWindowState.MouseScrollState.YOffset = YOffset;
+}
+
+void FramebufferSizeCallback(GLFWwindow *Window, int Width, int Height)
+{
+  GlobalWindowState.Width = Width;
+  GlobalWindowState.Height = Height;
+  glViewport(0, 0, GlobalWindowState.Width, GlobalWindowState.Height);
 }
 
 void ErrorCallback(int Error, const char *Description)
 {
   std::cout << Description << std::endl;
-}
-
-void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
-{
-  if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-  {
-    glfwSetWindowShouldClose(Window, true);
-  }
-
-  Camera *Camera = &WindowState->Camera;
-
-  if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
-  {
-    Camera->ProcessKeyboard(FORWARD, DeltaTime);
-  }
-  if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
-  {
-    Camera->ProcessKeyboard(BACKWARD, DeltaTime);
-  }
-  if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
-  {
-    Camera->ProcessKeyboard(LEFT, DeltaTime);
-  }
-  if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
-  {
-    Camera->ProcessKeyboard(RIGHT, DeltaTime);
-  }
-
-  WindowState->MouseLastFrame.X = WindowState->MouseCurrentFrame.X;
-  WindowState->MouseLastFrame.Y = WindowState->MouseCurrentFrame.Y;
-  glfwGetCursorPos(Window, &WindowState->MouseCurrentFrame.X, &WindowState->MouseCurrentFrame.Y);
-
-  if (WindowState->FirstMouseMove)
-  {
-    WindowState->MouseLastFrame.X = WindowState->MouseCurrentFrame.X;
-    WindowState->MouseLastFrame.Y = WindowState->MouseCurrentFrame.Y;
-    WindowState->FirstMouseMove = false;
-  }
-
-  float XOffset = (float)WindowState->MouseCurrentFrame.X - (float)WindowState->MouseLastFrame.X;
-  float YOffset = (float)WindowState->MouseLastFrame.Y - (float)WindowState->MouseCurrentFrame.Y;
-
-  Camera->ProcessMouseMovement(XOffset, YOffset);
-  Camera->ProcessMouseScroll((float)MouseScrollState.YOffset);
 }
 
 DrawResources SetupQuadResources()
@@ -367,6 +374,7 @@ int main()
   }
 
   glfwSetScrollCallback(Window, ScrollCallback);
+  glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
   glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   glEnable(GL_DEPTH_TEST);
@@ -396,13 +404,14 @@ int main()
 
   glm::mat4 ProjectionMatrix;
 
-  WindowState WindowState = {};
-  WindowState.FirstMouseMove = true;
-  WindowState.MouseCurrentFrame = {};
-  WindowState.MouseLastFrame = {};
-  WindowState.MouseCurrentFrame.X = ScreenWidth / 2;
-  WindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
-  WindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+  GlobalWindowState.Window = Window;
+  GlobalWindowState.FirstMouseMove = true;
+  GlobalWindowState.MouseCurrentFrame = {};
+  GlobalWindowState.MouseLastFrame = {};
+  GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
+  GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
+  GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+  glfwGetFramebufferSize(Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 
   float DeltaTime = 0.0f;
   float LastFrame = 0.0f;
@@ -413,22 +422,13 @@ int main()
     DeltaTime = CurrentFrame - LastFrame;
     LastFrame = CurrentFrame;
 
-    {
-      SimpleShader.use();
-      SimpleShader.setMat4("view", WindowState.Camera.ViewMatrix());
-    }
+    ProjectionMatrix = glm::perspective(glm::radians(GlobalWindowState.Camera.Zoom), (float)GlobalWindowState.Width / (float)GlobalWindowState.Height, 0.1f, 100.0f);
 
-    // FIXME: Use the resize callback to get "live" re-rendering on Windows
-    glfwGetFramebufferSize(Window, &WindowState.Width, &WindowState.Height);
-    {
-      SimpleShader.use();
-      ProjectionMatrix = glm::perspective(glm::radians(WindowState.Camera.Zoom), (float)WindowState.Width / (float)WindowState.Height, 0.1f, 100.0f);
-      SimpleShader.setMat4("projection", ProjectionMatrix);
+    SimpleShader.use();
+    SimpleShader.setMat4("view", GlobalWindowState.Camera.ViewMatrix());
+    SimpleShader.setMat4("projection", ProjectionMatrix);
 
-      glViewport(0, 0, WindowState.Width, WindowState.Height);
-    }
-
-    ProcessInput(Window, &WindowState, DeltaTime);
+    GlobalWindowState.ProcessInput(DeltaTime);
     Render(SimpleShader, QuadResources, CubeResources);
     glfwSwapBuffers(Window);
     glfwPollEvents();
