@@ -235,6 +235,11 @@ void FramebufferSizeCallback(GLFWwindow *Window, int Width, int Height)
   GlobalWindowState.Render();
 }
 
+void WindowRefreshCallback(GLFWwindow *Window)
+{
+  GlobalWindowState.Render();
+}
+
 void ErrorCallback(int Error, const char *Description)
 {
   std::cout << Description << std::endl;
@@ -387,6 +392,7 @@ int main()
 
   glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
+  glfwSetWindowRefreshCallback(Window, WindowRefreshCallback);
   glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   glEnable(GL_DEPTH_TEST);
