@@ -17,6 +17,9 @@
         "${workspaceFolder}/**",
         "C:\\glfw-3.2.1.bin.WIN64\\include"
       ],
+      "forcedInclude": [
+        "common.h"
+      ],
       "browse": {
         "path": [
           "${workspaceFolder}",
