@@ -20,3 +20,4 @@
 
 #include "glad.c"
 #include "shader.cpp"
+#include "camera.cpp"

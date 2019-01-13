@@ -53,8 +53,6 @@ static const unsigned int CubeIndices[] = {
     20, 21, 22, 22, 23, 20, // back
 };
 
-static const float CAMERA_SPEED_MULTIPLIER = 2.5f;
-
 struct DrawResources
 {
   unsigned int VAO;
@@ -62,16 +60,6 @@ struct DrawResources
   unsigned int EBO;
   unsigned int texture1;
   unsigned int texture2;
-};
-
-struct CameraState
-{
-  float Yaw;
-  float Pitch;
-  float FOV;
-  glm::vec3 Position;
-  glm::vec3 Front;
-  glm::vec3 Up;
 };
 
 struct MouseState
@@ -84,7 +72,7 @@ struct WindowState
 {
   int Width;
   int Height;
-  struct CameraState CameraState;
+  struct Camera Camera;
   bool FirstMouseMove;
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
@@ -116,28 +104,23 @@ void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
     glfwSetWindowShouldClose(Window, true);
   }
 
-  float CameraSpeed = CAMERA_SPEED_MULTIPLIER * DeltaTime;
-
-  CameraState *Camera = &WindowState->CameraState;
+  Camera *Camera = &WindowState->Camera;
 
   if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
   {
-    Camera->Position += CameraSpeed * Camera->Front;
+    Camera->ProcessKeyboard(FORWARD, DeltaTime);
   }
-
   if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
   {
-    Camera->Position -= CameraSpeed * Camera->Front;
+    Camera->ProcessKeyboard(BACKWARD, DeltaTime);
   }
-
   if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
   {
-    Camera->Position -= glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CameraSpeed;
+    Camera->ProcessKeyboard(LEFT, DeltaTime);
   }
-
   if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
   {
-    Camera->Position += glm::normalize(glm::cross(Camera->Front, Camera->Up)) * CameraSpeed;
+    Camera->ProcessKeyboard(RIGHT, DeltaTime);
   }
 
   WindowState->MouseLastFrame.X = WindowState->MouseCurrentFrame.X;
@@ -151,37 +134,11 @@ void ProcessInput(GLFWwindow *Window, WindowState *WindowState, float DeltaTime)
     WindowState->FirstMouseMove = false;
   }
 
-  float XOffset = WindowState->MouseCurrentFrame.X - WindowState->MouseLastFrame.X;
-  float YOffset = WindowState->MouseLastFrame.Y - WindowState->MouseCurrentFrame.Y;
+  float XOffset = (float)WindowState->MouseCurrentFrame.X - (float)WindowState->MouseLastFrame.X;
+  float YOffset = (float)WindowState->MouseLastFrame.Y - (float)WindowState->MouseCurrentFrame.Y;
 
-  float MouseSensitivity = 0.05f;
-  XOffset *= MouseSensitivity;
-  YOffset *= MouseSensitivity;
-
-  Camera->Yaw += XOffset;
-  Camera->Pitch += YOffset;
-
-  if (Camera->Pitch > 89.0f)
-  {
-    Camera->Pitch = 89.0f;
-  }
-  if (Camera->Pitch < -89.0f)
-  {
-    Camera->Pitch = -89.0f;
-  }
-
-  if (Camera->FOV >= 1.0f && Camera->FOV <= 45.0f)
-  {
-    Camera->FOV -= MouseScrollState.YOffset;
-  }
-  if (Camera->FOV <= 1.0f)
-  {
-    Camera->FOV = 1.0f;
-  }
-  if (Camera->FOV >= 45.0f)
-  {
-    Camera->FOV = 45.0f;
-  }
+  Camera->ProcessMouseMovement(XOffset, YOffset);
+  Camera->ProcessMouseScroll((float)MouseScrollState.YOffset);
 }
 
 DrawResources SetupQuadResources()
@@ -361,7 +318,7 @@ void Render(Shader Shader, DrawResources QuadResources, DrawResources CubeResour
     float Angle = 20.0f * i;
     if (i % 2 == 0)
     {
-      Angle += glfwGetTime() * 25.0f;
+      Angle += (float)glfwGetTime() * 25.0f;
     }
     glm::mat4 ModelMatrix = glm::mat4(1.0f);
     ModelMatrix = glm::translate(ModelMatrix, CubePosition);
@@ -437,7 +394,6 @@ int main()
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
 
-  glm::mat4 ViewMatrix;
   glm::mat4 ProjectionMatrix;
 
   WindowState WindowState = {};
@@ -446,44 +402,27 @@ int main()
   WindowState.MouseLastFrame = {};
   WindowState.MouseCurrentFrame.X = ScreenWidth / 2;
   WindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
-  {
-    CameraState CameraState = {};
-    CameraState.FOV = 45.0f;
-    CameraState.Position = glm::vec3(0.0f, 0.0f, 3.0f);
-    CameraState.Front = glm::vec3(0.0f, 0.0f, -1.0f);
-    CameraState.Up = glm::vec3(0.0f, 1.0f, 0.0f);
-    WindowState.CameraState = CameraState;
-  }
+  WindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
   float DeltaTime = 0.0f;
   float LastFrame = 0.0f;
 
   while (!glfwWindowShouldClose(Window))
   {
-    float CurrentFrame = glfwGetTime();
+    float CurrentFrame = (float)glfwGetTime();
     DeltaTime = CurrentFrame - LastFrame;
     LastFrame = CurrentFrame;
 
     {
-      WindowState.CameraState.Front.x =
-          cos(glm::radians(WindowState.CameraState.Pitch)) * cos(glm::radians(WindowState.CameraState.Yaw));
-      WindowState.CameraState.Front.y = sin(glm::radians(WindowState.CameraState.Pitch));
-      WindowState.CameraState.Front.z =
-          cos(glm::radians(WindowState.CameraState.Pitch)) * sin(glm::radians(WindowState.CameraState.Yaw));
-      WindowState.CameraState.Front = glm::normalize(WindowState.CameraState.Front);
-      ViewMatrix = glm::lookAt(
-          WindowState.CameraState.Position,
-          WindowState.CameraState.Position + WindowState.CameraState.Front,
-          WindowState.CameraState.Up);
-
       SimpleShader.use();
-      SimpleShader.setMat4("view", ViewMatrix);
+      SimpleShader.setMat4("view", WindowState.Camera.ViewMatrix());
     }
 
+    // FIXME: Use the resize callback to get "live" re-rendering on Windows
     glfwGetFramebufferSize(Window, &WindowState.Width, &WindowState.Height);
     {
       SimpleShader.use();
-      ProjectionMatrix = glm::perspective(glm::radians(WindowState.CameraState.FOV), (float)WindowState.Width / (float)WindowState.Height, 0.1f, 100.0f);
+      ProjectionMatrix = glm::perspective(glm::radians(WindowState.Camera.Zoom), (float)WindowState.Width / (float)WindowState.Height, 0.1f, 100.0f);
       SimpleShader.setMat4("projection", ProjectionMatrix);
 
       glViewport(0, 0, WindowState.Width, WindowState.Height);
