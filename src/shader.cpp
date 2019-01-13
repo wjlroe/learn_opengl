@@ -98,7 +98,7 @@ struct Shader
     glUniform1i(glGetUniformLocation(ID, Name), Value);
   }
 
-  void setFloat(const char *Name, int Value)
+  void setFloat(const char *Name, float Value)
   {
     glUniform1f(glGetUniformLocation(ID, Name), Value);
   }
