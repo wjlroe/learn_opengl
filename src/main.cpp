@@ -129,7 +129,7 @@ struct WindowState
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
   struct MouseScrollState MouseScrollState;
-  Shader *Shader;
+  struct Shader *Shader;
   DrawResources QuadResources;
   DrawResources CubeResources;
   glm::mat4 ProjectionMatrix;

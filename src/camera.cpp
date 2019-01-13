@@ -16,9 +16,9 @@ struct Camera
 {
   float Yaw;
   float Pitch;
-  float Zoom;
   float MovementSpeed;
   float MouseSensitivity;
+  float Zoom;
   glm::vec3 Position;
   glm::vec3 Front;
   glm::vec3 Up;
