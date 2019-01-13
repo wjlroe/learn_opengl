@@ -62,6 +62,51 @@ struct DrawResources
   unsigned int texture2;
 };
 
+void DrawRectangle(Shader *SimpleShader, DrawResources Resources)
+{
+  SimpleShader->use();
+
+  if (Resources.texture1)
+  {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
+  }
+  if (Resources.texture2)
+  {
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
+  }
+
+  glBindVertexArray(Resources.VAO);
+
+  // Draw in wireframe mode
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  int NumTriangles = 6;
+  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+}
+
+void DrawCube(Shader *SimpleShader, DrawResources Resources)
+{
+  SimpleShader->use();
+
+  if (Resources.texture1)
+  {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
+  }
+  if (Resources.texture2)
+  {
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
+  }
+
+  glBindVertexArray(Resources.VAO);
+
+  int NumTriangles = 36;
+  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+}
+
 struct MouseState
 {
   double X;
@@ -84,6 +129,10 @@ struct WindowState
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
   struct MouseScrollState MouseScrollState;
+  Shader *Shader;
+  DrawResources QuadResources;
+  DrawResources CubeResources;
+  glm::mat4 ProjectionMatrix;
 
   void ProcessInput(float DeltaTime)
   {
@@ -126,9 +175,51 @@ struct WindowState
     Camera.ProcessMouseMovement(XOffset, YOffset);
     Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
   }
+
+  void Render()
+  {
+    ProjectionMatrix = glm::perspective(glm::radians(Camera.Zoom), (float)Width / (float)Height, 0.1f, 100.0f);
+
+    Shader->use();
+    Shader->setMat4("view", Camera.ViewMatrix());
+    Shader->setMat4("projection", ProjectionMatrix);
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // DrawRectangle(Shader, QuadResources);
+    glm::vec3 CubePositions[] = {
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f, 2.0f, -2.5f),
+        glm::vec3(1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f)};
+    int i = 0;
+    for (glm::vec3 CubePosition : CubePositions)
+    {
+      float Angle = 20.0f * i;
+      if (i % 2 == 0)
+      {
+        Angle += (float)glfwGetTime() * 25.0f;
+      }
+      glm::mat4 ModelMatrix = glm::mat4(1.0f);
+      ModelMatrix = glm::translate(ModelMatrix, CubePosition);
+      ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
+      Shader->setMat4("model", ModelMatrix);
+      DrawCube(Shader, CubeResources);
+      ++i;
+    }
+
+    glfwSwapBuffers(Window);
+  }
 };
 
-static WindowState GlobalWindowState = {};
+static WindowState GlobalWindowState;
 
 void ScrollCallback(GLFWwindow *Window, double XOffset, double YOffset)
 {
@@ -141,6 +232,7 @@ void FramebufferSizeCallback(GLFWwindow *Window, int Width, int Height)
   GlobalWindowState.Width = Width;
   GlobalWindowState.Height = Height;
   glViewport(0, 0, GlobalWindowState.Width, GlobalWindowState.Height);
+  GlobalWindowState.Render();
 }
 
 void ErrorCallback(int Error, const char *Description)
@@ -256,86 +348,6 @@ void LoadTexture(unsigned int TextureUnit, unsigned int *Texture, const char *Te
   stbi_image_free(Data);
 }
 
-void DrawRectangle(Shader SimpleShader, DrawResources Resources)
-{
-  SimpleShader.use();
-
-  if (Resources.texture1)
-  {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
-  }
-  if (Resources.texture2)
-  {
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
-  }
-
-  glBindVertexArray(Resources.VAO);
-
-  // Draw in wireframe mode
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-  int NumTriangles = 6;
-  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
-}
-
-void DrawCube(Shader SimpleShader, DrawResources Resources)
-{
-  SimpleShader.use();
-
-  if (Resources.texture1)
-  {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
-  }
-  if (Resources.texture2)
-  {
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
-  }
-
-  glBindVertexArray(Resources.VAO);
-
-  int NumTriangles = 36;
-  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
-}
-
-void Render(Shader Shader, DrawResources QuadResources, DrawResources CubeResources)
-{
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  Shader.use();
-  // DrawRectangle(Shader, QuadResources);
-  glm::vec3 CubePositions[] = {
-      glm::vec3(0.0f, 0.0f, 0.0f),
-      glm::vec3(2.0f, 5.0f, -15.0f),
-      glm::vec3(-1.5f, -2.2f, -2.5f),
-      glm::vec3(-3.8f, -2.0f, -12.3f),
-      glm::vec3(2.4f, -0.4f, -3.5f),
-      glm::vec3(-1.7f, 3.0f, -7.5f),
-      glm::vec3(1.3f, -2.0f, -2.5f),
-      glm::vec3(1.5f, 2.0f, -2.5f),
-      glm::vec3(1.5f, 0.2f, -1.5f),
-      glm::vec3(-1.3f, 1.0f, -1.5f)};
-  int i = 0;
-  for (glm::vec3 CubePosition : CubePositions)
-  {
-    float Angle = 20.0f * i;
-    if (i % 2 == 0)
-    {
-      Angle += (float)glfwGetTime() * 25.0f;
-    }
-    glm::mat4 ModelMatrix = glm::mat4(1.0f);
-    ModelMatrix = glm::translate(ModelMatrix, CubePosition);
-    ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
-    Shader.setMat4("model", ModelMatrix);
-    DrawCube(Shader, CubeResources);
-    ++i;
-  }
-}
-
 void CleanupDrawResources(DrawResources Resources)
 {
   glDeleteVertexArrays(1, &Resources.VAO);
@@ -402,8 +414,6 @@ int main()
   SimpleShader.setInt("texture1", 0);
   SimpleShader.setInt("texture2", 1);
 
-  glm::mat4 ProjectionMatrix;
-
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
   GlobalWindowState.MouseCurrentFrame = {};
@@ -411,6 +421,9 @@ int main()
   GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
   GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
   GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+  GlobalWindowState.Shader = &SimpleShader;
+  GlobalWindowState.QuadResources = QuadResources;
+  GlobalWindowState.CubeResources = CubeResources;
   glfwGetFramebufferSize(Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 
   float DeltaTime = 0.0f;
@@ -422,15 +435,9 @@ int main()
     DeltaTime = CurrentFrame - LastFrame;
     LastFrame = CurrentFrame;
 
-    ProjectionMatrix = glm::perspective(glm::radians(GlobalWindowState.Camera.Zoom), (float)GlobalWindowState.Width / (float)GlobalWindowState.Height, 0.1f, 100.0f);
-
-    SimpleShader.use();
-    SimpleShader.setMat4("view", GlobalWindowState.Camera.ViewMatrix());
-    SimpleShader.setMat4("projection", ProjectionMatrix);
-
     GlobalWindowState.ProcessInput(DeltaTime);
-    Render(SimpleShader, QuadResources, CubeResources);
-    glfwSwapBuffers(Window);
+
+    GlobalWindowState.Render();
     glfwPollEvents();
   }
 
