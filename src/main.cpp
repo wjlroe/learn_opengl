@@ -1,10 +1,10 @@
 #include "common.h"
 
 static const float QuadVertices[] = {
-    0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
-    0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-    -0.5f, 0.5f, 0.0f, 0.0f, 1.0f}; // top left
+    1.0f, 1.0f, 0.0f, 1.0f, 1.0f,   // top right
+    1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+    -1.0f, 1.0f, 0.0f, 0.0f, 1.0f}; // top left
 
 static const unsigned int QuadIndices[] = {
     0, 1, 3,
@@ -60,11 +60,16 @@ struct DrawResources
   unsigned int EBO;
   unsigned int texture1;
   unsigned int texture2;
+  Shader *Shader;
 };
 
-void DrawRectangle(Shader *SimpleShader, DrawResources Resources)
+void DrawRectangle(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
 {
-  SimpleShader->use();
+  Shader *Shader = Resources.Shader;
+
+  Shader->use();
+  Shader->setMat4("view", ViewMatrix);
+  Shader->setMat4("projection", ProjectionMatrix);
 
   if (Resources.texture1)
   {
@@ -86,8 +91,10 @@ void DrawRectangle(Shader *SimpleShader, DrawResources Resources)
   glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
 }
 
-void DrawCube(Shader *SimpleShader, DrawResources Resources)
+void DrawCube(DrawResources Resources)
 {
+  Shader *SimpleShader = Resources.Shader;
+
   SimpleShader->use();
 
   if (Resources.texture1)
@@ -129,7 +136,6 @@ struct WindowState
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
   struct MouseScrollState MouseScrollState;
-  struct Shader *Shader;
   DrawResources QuadResources;
   DrawResources CubeResources;
   glm::mat4 ProjectionMatrix;
@@ -176,18 +182,13 @@ struct WindowState
     Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
   }
 
-  void Render()
+  void DrawAllTheCubes(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
   {
-    ProjectionMatrix = glm::perspective(glm::radians(Camera.Zoom), (float)Width / (float)Height, 0.1f, 100.0f);
-
+    Shader *Shader = Resources.Shader;
     Shader->use();
-    Shader->setMat4("view", Camera.ViewMatrix());
+    Shader->setMat4("view", ViewMatrix);
     Shader->setMat4("projection", ProjectionMatrix);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // DrawRectangle(Shader, QuadResources);
     glm::vec3 CubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(2.0f, 5.0f, -15.0f),
@@ -211,9 +212,28 @@ struct WindowState
       ModelMatrix = glm::translate(ModelMatrix, CubePosition);
       ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
       Shader->setMat4("model", ModelMatrix);
-      DrawCube(Shader, CubeResources);
+      DrawCube(CubeResources);
       ++i;
     }
+  }
+
+  void Render()
+  {
+    glm::mat4 IdentityMatrix = glm::mat4(1.0);
+    glm::mat4 PerspectiveProjectionMatrix = glm::perspective(glm::radians(Camera.Zoom), (float)Width / (float)Height, 0.1f, 100.0f);
+    glm::mat4 OrthoProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    glm::mat4 ViewMatrix = Camera.ViewMatrix();
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glm::mat4 ModelMatrix = glm::mat4(1.0f);
+    ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -0.2f, 0.0f));
+    ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    QuadResources.Shader->use();
+    QuadResources.Shader->setMat4("model", ModelMatrix);
+    DrawRectangle(QuadResources, IdentityMatrix, IdentityMatrix);
+    // DrawAllTheCubes(CubeResources, ViewMatrix, PerspectiveProjectionMatrix);
 
     glfwSwapBuffers(Window);
   }
@@ -245,7 +265,7 @@ void ErrorCallback(int Error, const char *Description)
   std::cout << Description << std::endl;
 }
 
-DrawResources SetupQuadResources()
+DrawResources SetupQuadResources(Shader *Shader)
 {
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
@@ -281,10 +301,11 @@ DrawResources SetupQuadResources()
   Resources.VAO = VAO;
   Resources.VBO = VBO;
   Resources.EBO = EBO;
+  Resources.Shader = Shader;
   return Resources;
 }
 
-DrawResources SetupCubeResources()
+DrawResources SetupCubeResources(Shader *Shader)
 {
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
@@ -320,6 +341,7 @@ DrawResources SetupCubeResources()
   Resources.VAO = VAO;
   Resources.VBO = VBO;
   Resources.EBO = EBO;
+  Resources.Shader = Shader;
   return Resources;
 }
 
@@ -407,11 +429,11 @@ int main()
 
   stbi_set_flip_vertically_on_load(true);
 
-  DrawResources QuadResources = SetupQuadResources();
+  DrawResources QuadResources = SetupQuadResources(&SimpleShader);
   LoadTexture(GL_TEXTURE0, &QuadResources.texture1, "../assets/container.jpg");
   LoadTexture(GL_TEXTURE1, &QuadResources.texture2, "../assets/awesomeface.png");
 
-  DrawResources CubeResources = SetupCubeResources();
+  DrawResources CubeResources = SetupCubeResources(&SimpleShader);
   // FIXME: these aren't related to the DrawResources I don't think...
   LoadTexture(GL_TEXTURE0, &CubeResources.texture1, "../assets/container.jpg");
   LoadTexture(GL_TEXTURE1, &CubeResources.texture2, "../assets/awesomeface.png");
@@ -427,7 +449,6 @@ int main()
   GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
   GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
   GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-  GlobalWindowState.Shader = &SimpleShader;
   GlobalWindowState.QuadResources = QuadResources;
   GlobalWindowState.CubeResources = CubeResources;
   glfwGetFramebufferSize(Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
