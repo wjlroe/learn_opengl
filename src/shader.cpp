@@ -113,6 +113,11 @@ struct Shader
     glUniform3f(glGetUniformLocation(ID, Name), x, y, z);
   }
 
+  void setVec3(const char *Name, const glm::vec3 &Value)
+  {
+    glUniform3fv(glGetUniformLocation(ID, Name), 1, &Value[0]);
+  }
+
   void setVec4(const char *Name, float x, float y, float z, float w)
   {
     glUniform4f(glGetUniformLocation(ID, Name), x, y, z, w);

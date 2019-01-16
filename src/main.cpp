@@ -60,7 +60,7 @@ struct DrawResources
   unsigned int EBO;
   unsigned int texture1;
   unsigned int texture2;
-  Shader *Shader;
+  struct Shader *Shader;
 };
 
 void DrawRectangle(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
@@ -227,12 +227,18 @@ struct WindowState
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 ModelMatrix = glm::mat4(1.0f);
-    ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -0.2f, 0.0f));
-    ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    QuadResources.Shader->use();
-    QuadResources.Shader->setMat4("model", ModelMatrix);
-    DrawRectangle(QuadResources, IdentityMatrix, IdentityMatrix);
+    {
+      // Draw some fake-UI
+      int BoxHeight = 27;
+      float MoveDown = -((float)(Height - BoxHeight) / (float)BoxHeight);
+      glm::mat4 ModelMatrix = glm::mat4(1.0f);
+      ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, (float)BoxHeight / (float)Height, 1.0f));
+      ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, MoveDown, 0.0f));
+      QuadResources.Shader->use();
+      QuadResources.Shader->setMat4("model", ModelMatrix);
+      QuadResources.Shader->setVec3("color", glm::vec3(0.3f, 0.5f, 0.9f));
+      DrawRectangle(QuadResources, IdentityMatrix, IdentityMatrix);
+    }
     // DrawAllTheCubes(CubeResources, ViewMatrix, PerspectiveProjectionMatrix);
 
     glfwSwapBuffers(Window);
@@ -426,12 +432,11 @@ int main()
   }
 
   Shader SimpleShader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
+  Shader FlatColorShader("../src/shaders/flat_color.vert", "../src/shaders/flat_color.frag");
 
   stbi_set_flip_vertically_on_load(true);
 
-  DrawResources QuadResources = SetupQuadResources(&SimpleShader);
-  LoadTexture(GL_TEXTURE0, &QuadResources.texture1, "../assets/container.jpg");
-  LoadTexture(GL_TEXTURE1, &QuadResources.texture2, "../assets/awesomeface.png");
+  DrawResources QuadResources = SetupQuadResources(&FlatColorShader);
 
   DrawResources CubeResources = SetupCubeResources(&SimpleShader);
   // FIXME: these aren't related to the DrawResources I don't think...
