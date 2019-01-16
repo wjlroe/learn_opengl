@@ -245,6 +245,7 @@ struct WindowState
   }
 };
 
+const static bool CAPTURE_MOUSE = false;
 static WindowState GlobalWindowState;
 
 void ScrollCallback(GLFWwindow *Window, double XOffset, double YOffset)
@@ -421,7 +422,10 @@ int main()
   glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
   glfwSetWindowRefreshCallback(Window, WindowRefreshCallback);
-  glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  if (CAPTURE_MOUSE)
+  {
+    glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  }
 
   glEnable(GL_DEPTH_TEST);
 
