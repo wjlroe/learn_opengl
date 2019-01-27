@@ -419,6 +419,11 @@ int main()
     return -1;
   }
 
+  const GLubyte *renderer = glGetString(GL_RENDERER);
+  const GLubyte *version = glGetString(GL_VERSION);
+  std::cout << "Renderer: " << renderer << std::endl;
+  std::cout << "OpenGL version supported: " << version << std::endl;
+
   glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
   glfwSetWindowRefreshCallback(Window, WindowRefreshCallback);
