@@ -53,6 +53,11 @@ static const unsigned int CubeIndices[] = {
     20, 21, 22, 22, 23, 20, // back
 };
 
+static enum DEBUG_IDS {
+  DEBUG_FAKE_UI,
+  DEBUG_CUBES
+};
+
 struct DrawResources
 {
   unsigned int VAO;
@@ -228,6 +233,7 @@ struct WindowState
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     {
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_FAKE_UI, -1, "Fake_UI");
       // Draw some fake-UI
       int BoxHeight = 27;
       float MoveDown = -((float)(Height - BoxHeight) / (float)BoxHeight);
@@ -238,8 +244,14 @@ struct WindowState
       QuadResources.Shader->setMat4("model", ModelMatrix);
       QuadResources.Shader->setVec3("color", glm::vec3(0.3f, 0.5f, 0.9f));
       DrawRectangle(QuadResources, IdentityMatrix, IdentityMatrix);
+      glPopDebugGroup();
     }
-    // DrawAllTheCubes(CubeResources, ViewMatrix, PerspectiveProjectionMatrix);
+
+    {
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "Cubes");
+      DrawAllTheCubes(CubeResources, ViewMatrix, PerspectiveProjectionMatrix);
+      glPopDebugGroup();
+    }
 
     glfwSwapBuffers(Window);
   }
@@ -394,7 +406,7 @@ int main()
   glfwInit();
   glfwSetErrorCallback(ErrorCallback);
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
