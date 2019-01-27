@@ -53,7 +53,8 @@ static const unsigned int CubeIndices[] = {
     20, 21, 22, 22, 23, 20, // back
 };
 
-static enum DEBUG_IDS {
+enum DEBUG_IDS
+{
   DEBUG_FAKE_UI,
   DEBUG_CUBES
 };
