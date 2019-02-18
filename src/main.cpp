@@ -55,7 +55,8 @@ static const unsigned int CubeIndices[] = {
 
 enum DEBUG_IDS
 {
-  DEBUG_CUBES
+  DEBUG_CUBES,
+  DEBUG_LIGHT_SOURCE,
 };
 
 struct DrawResources
@@ -141,8 +142,8 @@ struct WindowState
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
   struct MouseScrollState MouseScrollState;
-  DrawResources QuadResources;
-  DrawResources CubeResources;
+  DrawResources LampResources;
+  DrawResources LightingResources;
   glm::mat4 ProjectionMatrix;
 
   void ProcessInput(float DeltaTime)
@@ -193,33 +194,33 @@ struct WindowState
     Shader->use();
     Shader->setMat4("view", ViewMatrix);
     Shader->setMat4("projection", ProjectionMatrix);
+    Shader->setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+    Shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     glm::vec3 CubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(2.0f, 5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f, 3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f, 2.0f, -2.5f),
-        glm::vec3(1.5f, 0.2f, -1.5f),
-        glm::vec3(-1.3f, 1.0f, -1.5f)};
-    int i = 0;
+    };
     for (glm::vec3 CubePosition : CubePositions)
     {
-      float Angle = 20.0f * i;
-      if (i % 2 == 0)
-      {
-        Angle += (float)glfwGetTime() * 25.0f;
-      }
       glm::mat4 ModelMatrix = glm::mat4(1.0f);
       ModelMatrix = glm::translate(ModelMatrix, CubePosition);
-      ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
       Shader->setMat4("model", ModelMatrix);
-      DrawCube(CubeResources);
-      ++i;
+      DrawCube(Resources);
     }
+  }
+
+  void DrawLightSource(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
+  {
+    Shader *Shader = Resources.Shader;
+    Shader->use();
+    Shader->setMat4("view", ViewMatrix);
+    Shader->setMat4("projection", ProjectionMatrix);
+    glm::vec3 LightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+    glm::mat4 ModelMatrix = glm::mat4(1.0f);
+    ModelMatrix = glm::translate(ModelMatrix, LightPos);
+    ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f));
+    Shader->setMat4("model", ModelMatrix);
+    DrawCube(Resources);
   }
 
   void Render()
@@ -233,8 +234,14 @@ struct WindowState
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     {
-      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "Cubes");
-      DrawAllTheCubes(CubeResources, ViewMatrix, PerspectiveProjectionMatrix);
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "A Cube");
+      DrawAllTheCubes(LightingResources, ViewMatrix, PerspectiveProjectionMatrix);
+      glPopDebugGroup();
+    }
+
+    {
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_LIGHT_SOURCE, -1, "LightSource");
+      DrawLightSource(LampResources, ViewMatrix, PerspectiveProjectionMatrix);
       glPopDebugGroup();
     }
 
@@ -269,7 +276,7 @@ void ErrorCallback(int Error, const char *Description)
   std::cout << Description << std::endl;
 }
 
-DrawResources SetupQuadResources(Shader *Shader)
+DrawResources SetupLightResources(Shader *Shader)
 {
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
@@ -280,23 +287,19 @@ DrawResources SetupQuadResources(Shader *Shader)
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVertices), QuadVertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
 
   unsigned int EBO;
   glGenBuffers(1, &EBO);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(QuadIndices), QuadIndices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(CubeIndices), CubeIndices, GL_STATIC_DRAW);
 
   int aPosLocation = 0;
   int aPosSize = 3;
-  int aTexLocation = 1;
-  int aTexSize = 2;
 
   glVertexAttribPointer(aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(aPosLocation);
-  glVertexAttribPointer(aTexLocation, aTexSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(aTexLocation);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -330,13 +333,9 @@ DrawResources SetupCubeResources(Shader *Shader)
 
   int aPosLocation = 0;
   int aPosSize = 3;
-  int aTexLocation = 1;
-  int aTexSize = 2;
 
   glVertexAttribPointer(aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(aPosLocation);
-  glVertexAttribPointer(aTexLocation, aTexSize, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(aTexLocation);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -437,21 +436,17 @@ int main()
     std::cout << "Max number of vertex attributes supported: " << NumAttributes << std::endl;
   }
 
-  Shader SimpleShader("../src/shaders/simple.vert", "../src/shaders/simple.frag");
-  Shader FlatColorShader("../src/shaders/flat_color.vert", "../src/shaders/flat_color.frag");
+  Shader LightingShader("../src/shaders/lighting.vert", "../src/shaders/lighting.frag");
+  Shader LampShader("../src/shaders/lamp.vert", "../src/shaders/lamp.frag");
 
   stbi_set_flip_vertically_on_load(true);
 
-  DrawResources QuadResources = SetupQuadResources(&FlatColorShader);
+  DrawResources LampResources = SetupLightResources(&LampShader);
+  DrawResources LightingResources = SetupCubeResources(&LightingShader);
 
-  DrawResources CubeResources = SetupCubeResources(&SimpleShader);
   // FIXME: these aren't related to the DrawResources I don't think...
-  LoadTexture(GL_TEXTURE0, &CubeResources.texture1, "../assets/container.jpg");
-  LoadTexture(GL_TEXTURE1, &CubeResources.texture2, "../assets/awesomeface.png");
-
-  SimpleShader.use();
-  SimpleShader.setInt("texture1", 0);
-  SimpleShader.setInt("texture2", 1);
+  // LoadTexture(GL_TEXTURE0, &CubeResources.texture1, "../assets/container.jpg");
+  // LoadTexture(GL_TEXTURE1, &CubeResources.texture2, "../assets/awesomeface.png");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
@@ -460,8 +455,8 @@ int main()
   GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
   GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
   GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-  GlobalWindowState.QuadResources = QuadResources;
-  GlobalWindowState.CubeResources = CubeResources;
+  GlobalWindowState.LampResources = LampResources;
+  GlobalWindowState.LightingResources = LightingResources;
   glfwGetFramebufferSize(Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 
   float DeltaTime = 0.0f;
@@ -479,7 +474,8 @@ int main()
     glfwPollEvents();
   }
 
-  CleanupDrawResources(CubeResources);
+  CleanupDrawResources(LightingResources);
+  CleanupDrawResources(LampResources);
 
   glfwTerminate();
   return 0;
