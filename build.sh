@@ -12,5 +12,4 @@ fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$DIR" #> /dev/null
 mkdir -p ./build
-pushd ./build #> /dev/null
-c++ -std=c++11 -Wall -o learngl ../src/main.cpp -I../include -I/usr/local/include -g $CFLAGS
+c++ -std=c++11 -Wall -o build/learngl src/main.cpp -Iinclude -I/usr/local/include -g $CFLAGS
