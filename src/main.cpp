@@ -225,28 +225,13 @@ struct WindowState
 
   void Render()
   {
-    glm::mat4 IdentityMatrix = glm::mat4(1.0);
+    // glm::mat4 IdentityMatrix = glm::mat4(1.0);
     glm::mat4 PerspectiveProjectionMatrix = glm::perspective(glm::radians(Camera.Zoom), (float)Width / (float)Height, 0.1f, 100.0f);
-    glm::mat4 OrthoProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    // glm::mat4 OrthoProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
     glm::mat4 ViewMatrix = Camera.ViewMatrix();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    {
-      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_FAKE_UI, -1, "Fake_UI");
-      // Draw some fake-UI
-      int BoxHeight = 27;
-      float MoveDown = -((float)(Height - BoxHeight) / (float)BoxHeight);
-      glm::mat4 ModelMatrix = glm::mat4(1.0f);
-      ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, (float)BoxHeight / (float)Height, 1.0f));
-      ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, MoveDown, 0.0f));
-      QuadResources.Shader->use();
-      QuadResources.Shader->setMat4("model", ModelMatrix);
-      QuadResources.Shader->setVec3("color", glm::vec3(0.3f, 0.5f, 0.9f));
-      DrawRectangle(QuadResources, IdentityMatrix, IdentityMatrix);
-      glPopDebugGroup();
-    }
 
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "Cubes");
