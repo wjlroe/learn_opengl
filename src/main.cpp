@@ -213,7 +213,7 @@ struct WindowState
     Shader->setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
     Shader->setInt("material.diffuse", 0);
     Shader->setInt("material.specular", 1);
-    Shader->setInt("material.emission", 2);
+    // Shader->setInt("material.emission", 2);
     Shader->setFloat("material.shininess", 32.0f);
 
     glm::vec3 lightColor;
@@ -224,20 +224,32 @@ struct WindowState
     glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
     glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
-    Shader->setVec3("light.position", LightPos);
+    Shader->setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
     Shader->setVec3("light.ambient", ambientColor);
     Shader->setVec3("light.diffuse", diffuseColor);
     Shader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     glm::vec3 CubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
-    };
+        glm::vec3(2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f, 2.0f, -2.5f),
+        glm::vec3(1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f)};
+    int i = 0;
     for (glm::vec3 CubePosition : CubePositions)
     {
       glm::mat4 ModelMatrix = glm::mat4(1.0f);
       ModelMatrix = glm::translate(ModelMatrix, CubePosition);
+      float Angle = 20.0f * i;
+      ModelMatrix = glm::rotate(ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
       Shader->setMat4("model", ModelMatrix);
       DrawCube(Resources);
+      i++;
     }
   }
 
@@ -486,7 +498,7 @@ int main()
   // FIXME: these aren't related to the DrawResources I don't think...
   LoadTexture(GL_TEXTURE0, &LightingResources.texture1, "../assets/container2.png");
   LoadTexture(GL_TEXTURE1, &LightingResources.texture2, "../assets/container2_specular.png");
-  LoadTexture(GL_TEXTURE2, &LightingResources.texture3, "../assets/matrix.jpg");
+  // LoadTexture(GL_TEXTURE2, &LightingResources.texture3, "../assets/matrix.jpg");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
