@@ -201,7 +201,7 @@ struct WindowState
     Shader->setVec3("viewPos", Camera.Position);
     Shader->setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
     Shader->setInt("material.diffuse", 0);
-    Shader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    Shader->setInt("material.specular", 1);
     Shader->setFloat("material.shininess", 32.0f);
 
     glm::vec3 lightColor;
@@ -473,7 +473,7 @@ int main()
 
   // FIXME: these aren't related to the DrawResources I don't think...
   LoadTexture(GL_TEXTURE0, &LightingResources.texture1, "../assets/container2.png");
-  // LoadTexture(GL_TEXTURE1, &CubeResources.texture2, "../assets/awesomeface.png");
+  LoadTexture(GL_TEXTURE1, &LightingResources.texture2, "../assets/container2_specular.png");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
