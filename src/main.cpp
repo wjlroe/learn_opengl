@@ -69,6 +69,7 @@ struct DrawResources
   unsigned int EBO;
   unsigned int texture1;
   unsigned int texture2;
+  unsigned int texture3;
   struct Shader *Shader;
 };
 
@@ -89,6 +90,11 @@ void DrawRectangle(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 Proj
   {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, Resources.texture2);
+  }
+  if (Resources.texture3)
+  {
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture3);
   }
 
   glBindVertexArray(Resources.VAO);
@@ -115,6 +121,11 @@ void DrawCube(DrawResources Resources)
   {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, Resources.texture2);
+  }
+  if (Resources.texture3)
+  {
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, Resources.texture3);
   }
 
   glBindVertexArray(Resources.VAO);
@@ -202,6 +213,7 @@ struct WindowState
     Shader->setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
     Shader->setInt("material.diffuse", 0);
     Shader->setInt("material.specular", 1);
+    Shader->setInt("material.emission", 2);
     Shader->setFloat("material.shininess", 32.0f);
 
     glm::vec3 lightColor;
@@ -474,6 +486,7 @@ int main()
   // FIXME: these aren't related to the DrawResources I don't think...
   LoadTexture(GL_TEXTURE0, &LightingResources.texture1, "../assets/container2.png");
   LoadTexture(GL_TEXTURE1, &LightingResources.texture2, "../assets/container2_specular.png");
+  LoadTexture(GL_TEXTURE2, &LightingResources.texture3, "../assets/matrix.jpg");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
