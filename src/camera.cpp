@@ -1,5 +1,5 @@
 static const float DEFAULT_YAW = -90.0f;
-static const float DEFAULT_PITCH = 0.0f;
+static const float DEFAULT_CAMERA_PITCH = 0.0f;
 static const float DEFAULT_SPEED = 2.5f;
 static const float DEFAULT_SENSITIVITY = 0.1f;
 static const float DEFAULT_ZOOM = 45.0f;
@@ -25,7 +25,7 @@ struct Camera
   glm::vec3 Right;
   glm::vec3 WorldUp;
 
-  Camera(glm::vec3 _Position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 _WorldUp = glm::vec3(0.0f, 1.0f, 0.0f), float _Yaw = DEFAULT_YAW, float _Pitch = DEFAULT_PITCH) : MovementSpeed(DEFAULT_SPEED), MouseSensitivity(DEFAULT_SENSITIVITY), Zoom(DEFAULT_ZOOM)
+  Camera(glm::vec3 _Position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 _WorldUp = glm::vec3(0.0f, 1.0f, 0.0f), float _Yaw = DEFAULT_YAW, float _Pitch = DEFAULT_CAMERA_PITCH) : MovementSpeed(DEFAULT_SPEED), MouseSensitivity(DEFAULT_SENSITIVITY), Zoom(DEFAULT_ZOOM)
   {
     Yaw = _Yaw;
     Pitch = _Pitch;
