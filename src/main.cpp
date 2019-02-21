@@ -216,10 +216,12 @@ struct WindowState
     // Shader->setInt("material.emission", 2);
     Shader->setFloat("material.shininess", 32.0f);
 
-    Shader->setVec3("light.position", LightPos);
-    // Shader->setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    Shader->setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    Shader->setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    Shader->setVec3("light.position", Camera.Position);
+    Shader->setVec3("light.direction", Camera.Front);
+    Shader->setFloat("light.cutoff", glm::cos(glm::radians(12.5f)));
+    Shader->setFloat("light.outerCutoff", glm::cos(glm::radians(17.5f)));
+    Shader->setVec3("light.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+    Shader->setVec3("light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
     Shader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
     Shader->setFloat("light.constant", 1.0f);
     Shader->setFloat("light.linear", 0.09f);
