@@ -216,18 +216,14 @@ struct WindowState
     // Shader->setInt("material.emission", 2);
     Shader->setFloat("material.shininess", 32.0f);
 
-    glm::vec3 lightColor;
-    lightColor.x = sin(glfwGetTime() * 2.0f);
-    lightColor.y = sin(glfwGetTime() * 0.7f);
-    lightColor.z = sin(glfwGetTime() * 1.3f);
-
-    glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-
-    Shader->setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    Shader->setVec3("light.ambient", ambientColor);
-    Shader->setVec3("light.diffuse", diffuseColor);
+    Shader->setVec3("light.position", LightPos);
+    // Shader->setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    Shader->setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    Shader->setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
     Shader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setFloat("light.constant", 1.0f);
+    Shader->setFloat("light.linear", 0.09f);
+    Shader->setFloat("light.quadratic", 0.032f);
 
     glm::vec3 CubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -292,7 +288,7 @@ struct WindowState
   }
 };
 
-const static bool CAPTURE_MOUSE = false;
+const static bool CAPTURE_MOUSE = true;
 static WindowState GlobalWindowState;
 
 void ScrollCallback(GLFWwindow *Window, double XOffset, double YOffset)
