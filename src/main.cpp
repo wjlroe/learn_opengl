@@ -202,7 +202,7 @@ struct WindowState
     Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
   }
 
-  void DrawAllTheCubes(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
+  void DrawAllTheCubes(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, glm::vec3 pointLightPositions[])
   {
     Shader *Shader = Resources.Shader;
     Shader->use();
@@ -216,16 +216,59 @@ struct WindowState
     // Shader->setInt("material.emission", 2);
     Shader->setFloat("material.shininess", 32.0f);
 
-    Shader->setVec3("light.position", Camera.Position);
-    Shader->setVec3("light.direction", Camera.Front);
-    Shader->setFloat("light.cutoff", glm::cos(glm::radians(12.5f)));
-    Shader->setFloat("light.outerCutoff", glm::cos(glm::radians(17.5f)));
-    Shader->setVec3("light.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
-    Shader->setVec3("light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    Shader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setFloat("light.constant", 1.0f);
-    Shader->setFloat("light.linear", 0.09f);
-    Shader->setFloat("light.quadratic", 0.032f);
+    // directional light
+    Shader->setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    Shader->setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    Shader->setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+    Shader->setVec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+
+    // point light 1
+    Shader->setVec3("pointLights[0].position", pointLightPositions[0]);
+    Shader->setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    Shader->setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    Shader->setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setFloat("pointLights[0].constant", 1.0f);
+    Shader->setFloat("pointLights[0].linear", 0.09f);
+    Shader->setFloat("pointLights[0].quadratic", 0.032f);
+
+    // point light 2
+    Shader->setVec3("pointLights[1].position", pointLightPositions[1]);
+    Shader->setVec3("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    Shader->setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    Shader->setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setFloat("pointLights[1].constant", 1.0f);
+    Shader->setFloat("pointLights[1].linear", 0.09f);
+    Shader->setFloat("pointLights[1].quadratic", 0.032f);
+
+    // point light 3
+    Shader->setVec3("pointLights[2].position", pointLightPositions[2]);
+    Shader->setVec3("pointLights[2].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    Shader->setVec3("pointLights[2].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    Shader->setVec3("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setFloat("pointLights[2].constant", 1.0f);
+    Shader->setFloat("pointLights[2].linear", 0.09f);
+    Shader->setFloat("pointLights[2].quadratic", 0.032f);
+
+    // point light 4
+    Shader->setVec3("pointLights[3].position", pointLightPositions[3]);
+    Shader->setVec3("pointLights[3].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    Shader->setVec3("pointLights[3].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    Shader->setVec3("pointLights[3].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setFloat("pointLights[3].constant", 1.0f);
+    Shader->setFloat("pointLights[3].linear", 0.09f);
+    Shader->setFloat("pointLights[3].quadratic", 0.032f);
+
+    // spotlight
+    Shader->setVec3("spotLight.position", Camera.Position);
+    Shader->setVec3("spotLight.direction", Camera.Front);
+    Shader->setVec3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+    Shader->setVec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setVec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    Shader->setFloat("spotLight.constant", 1.0f);
+    Shader->setFloat("spotLight.linear", 0.09f);
+    Shader->setFloat("spotLight.quadratic", 0.032f);
+    Shader->setFloat("spotLight.cutoff", glm::cos(glm::radians(12.5f)));
+    Shader->setFloat("spotLight.outerCutoff", glm::cos(glm::radians(15.0f)));
 
     glm::vec3 CubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -251,14 +294,14 @@ struct WindowState
     }
   }
 
-  void DrawLightSource(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
+  void DrawLightSource(DrawResources Resources, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, glm::vec3 Position)
   {
     Shader *Shader = Resources.Shader;
     Shader->use();
     Shader->setMat4("view", ViewMatrix);
     Shader->setMat4("projection", ProjectionMatrix);
     glm::mat4 ModelMatrix = glm::mat4(1.0f);
-    ModelMatrix = glm::translate(ModelMatrix, LightPos);
+    ModelMatrix = glm::translate(ModelMatrix, Position);
     ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f));
     Shader->setMat4("model", ModelMatrix);
     DrawCube(Resources);
@@ -274,15 +317,26 @@ struct WindowState
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(0.7f, 0.2f, 2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f, 2.0f, -12.0f),
+        glm::vec3(0.0f, 0.0f, -3.0f),
+    };
+
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "A Cube");
-      DrawAllTheCubes(LightingResources, ViewMatrix, PerspectiveProjectionMatrix);
+      DrawAllTheCubes(LightingResources, ViewMatrix, PerspectiveProjectionMatrix, pointLightPositions);
       glPopDebugGroup();
     }
 
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_LIGHT_SOURCE, -1, "LightSource");
-      DrawLightSource(LampResources, ViewMatrix, PerspectiveProjectionMatrix);
+      for (int i = 0; i < 4; i++)
+      {
+        glm::vec3 pointLight = pointLightPositions[i];
+        DrawLightSource(LampResources, ViewMatrix, PerspectiveProjectionMatrix, pointLight);
+      }
       glPopDebugGroup();
     }
 
