@@ -59,6 +59,7 @@ enum DEBUG_IDS
 {
   DEBUG_CUBES,
   DEBUG_LIGHT_SOURCE,
+  DEBUG_NANOSUIT,
 };
 
 struct DrawResources
@@ -155,6 +156,8 @@ struct WindowState
   struct MouseScrollState MouseScrollState;
   DrawResources LampResources;
   DrawResources LightingResources;
+  Model* ModelToDraw;
+  Shader* ModelShader;
   glm::mat4 ProjectionMatrix;
 
   void ProcessInput(float DeltaTime)
@@ -318,6 +321,22 @@ struct WindowState
       glm::vec3(-4.0f, 2.0f, -12.0f),
       glm::vec3(0.0f, 0.0f, -3.0f),
     };
+
+    {
+      glPushDebugGroup(
+        GL_DEBUG_SOURCE_APPLICATION, DEBUG_NANOSUIT, -1, "Nanosuit");
+      ModelShader->use();
+      ModelShader->setMat4("projection", PerspectiveProjectionMatrix);
+      ModelShader->setMat4("view", ViewMatrix);
+
+      glm::mat4 NanoSuitModel = glm::mat4(1.0f);
+      NanoSuitModel =
+        glm::translate(NanoSuitModel, glm::vec3(-1.8f, -1.75f, 0.0f));
+      NanoSuitModel = glm::scale(NanoSuitModel, glm::vec3(0.2f, 0.2f, 0.2f));
+      ModelShader->setMat4("model", NanoSuitModel);
+      ModelToDraw->Draw(*ModelShader);
+      glPopDebugGroup();
+    }
 
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "A Cube");
@@ -572,11 +591,15 @@ main()
   Shader LightingShader("../src/shaders/lighting.vert",
                         "../src/shaders/lighting.frag");
   Shader LampShader("../src/shaders/lamp.vert", "../src/shaders/lamp.frag");
+  Shader ModelLoadingShader("../src/shaders/model_loading.vert",
+                            "../src/shaders/model_loading.frag");
 
   stbi_set_flip_vertically_on_load(true);
 
   DrawResources LampResources = SetupLightResources(&LampShader);
   DrawResources LightingResources = SetupCubeResources(&LightingShader);
+
+  Model CrysisNanoSuit("../assets/meshes/nanosuit/nanosuit.obj");
 
   // FIXME: these aren't related to the DrawResources I don't think...
   LoadTexture(
@@ -596,6 +619,8 @@ main()
   GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
   GlobalWindowState.LampResources = LampResources;
   GlobalWindowState.LightingResources = LightingResources;
+  GlobalWindowState.ModelToDraw = &CrysisNanoSuit;
+  GlobalWindowState.ModelShader = &ModelLoadingShader;
   glfwGetFramebufferSize(
     Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 

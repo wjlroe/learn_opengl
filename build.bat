@@ -10,7 +10,7 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary
 set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN64\include"
 set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN64\lib-vc2015"
 set ASSIMP_INCLUDE_PATH="C:\dev\assimp-4.1.0\include"
-set ASSIMP_LIB_PATH="C:\dev\assimp-4.1.0\lib\Debug"
+set ASSIMP_LIB_PATH="C:\dev\assimp-4.1.0\lib\Release"
 
 set build_message=BUILD_PATH is %BUILD_PATH%
 echo %build_message%

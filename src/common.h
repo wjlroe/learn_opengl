@@ -1,3 +1,6 @@
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <fstream>
 #include <glad/glad.h>
 #include <iostream>
@@ -19,7 +22,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "camera.cpp"
+// clang-format off
 #include "glad.c"
-#include "mesh.cpp"
+#include "camera.cpp"
 #include "shader.cpp"
+#include "mesh.cpp"
+#include "model.cpp"
+// clang-format on
