@@ -9,6 +9,8 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary
 
 set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN64\include"
 set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN64\lib-vc2015"
+set ASSIMP_INCLUDE_PATH="C:\dev\assimp-4.1.0\include"
+set ASSIMP_LIB_PATH="C:\dev\assimp-4.1.0\lib\Debug"
 
 set build_message=BUILD_PATH is %BUILD_PATH%
 echo %build_message%
@@ -16,8 +18,10 @@ cd %BUILD_PATH%
 IF NOT EXIST build mkdir build
 pushd build
 IF NOT EXIST glfw3.dll copy %GLFW_LIB_PATH%\glfw3.dll .
-cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc ..\src\main.cpp -I ..\include -I %GLFW_INCLUDE_PATH%^
- /link %GLFW_LIB_PATH%\glfw3.lib %GLFW_LIB_PATH%\glfw3dll.lib opengl32.lib glu32.lib /SUBSYSTEM:CONSOLE
+cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc ..\src\main.cpp -I ..\include^
+ -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH%^
+ /link %GLFW_LIB_PATH%\glfw3.lib %GLFW_LIB_PATH%\glfw3dll.lib opengl32.lib^
+ glu32.lib %ASSIMP_LIB_PATH%\assimp-vc140-mt.lib /SUBSYSTEM:CONSOLE
 IF %ERRORLEVEL% NEQ 0 SET /A errno=%ERRORLEVEL%
 popd
 

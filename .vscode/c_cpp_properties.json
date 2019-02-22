@@ -15,7 +15,8 @@
       "name": "Win32",
       "includePath": [
         "${workspaceFolder}/**",
-        "C:\\glfw-3.2.1.bin.WIN64\\include"
+        "C:\\glfw-3.2.1.bin.WIN64\\include",
+        "C:\\dev\\assimp-4.1.0\\include"
       ],
       "forcedInclude": [
         "common.h"
@@ -23,7 +24,8 @@
       "browse": {
         "path": [
           "${workspaceFolder}",
-          "C:\\glfw-3.2.1.bin.WIN64\\include"
+          "C:\\glfw-3.2.1.bin.WIN64\\include",
+          "C:\\dev\\assimp-4.1.0\\include"
         ]
       },
       "defines": [],
