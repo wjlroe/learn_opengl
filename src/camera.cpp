@@ -25,7 +25,13 @@ struct Camera
   glm::vec3 Right;
   glm::vec3 WorldUp;
 
-  Camera(glm::vec3 _Position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 _WorldUp = glm::vec3(0.0f, 1.0f, 0.0f), float _Yaw = DEFAULT_YAW, float _Pitch = DEFAULT_CAMERA_PITCH) : MovementSpeed(DEFAULT_SPEED), MouseSensitivity(DEFAULT_SENSITIVITY), Zoom(DEFAULT_ZOOM)
+  Camera(glm::vec3 _Position = glm::vec3(0.0f, 0.0f, 0.0f),
+         glm::vec3 _WorldUp = glm::vec3(0.0f, 1.0f, 0.0f),
+         float _Yaw = DEFAULT_YAW,
+         float _Pitch = DEFAULT_CAMERA_PITCH)
+    : MovementSpeed(DEFAULT_SPEED)
+    , MouseSensitivity(DEFAULT_SENSITIVITY)
+    , Zoom(DEFAULT_ZOOM)
   {
     Yaw = _Yaw;
     Pitch = _Pitch;
@@ -34,7 +40,9 @@ struct Camera
     UpdateVectors();
   }
 
-  void ProcessMouseMovement(float XOffset, float YOffset, bool ConstrainPitch = true)
+  void ProcessMouseMovement(float XOffset,
+                            float YOffset,
+                            bool ConstrainPitch = true)
   {
     XOffset *= MouseSensitivity;
     YOffset *= MouseSensitivity;
@@ -42,14 +50,11 @@ struct Camera
     Yaw += XOffset;
     Pitch += YOffset;
 
-    if (ConstrainPitch)
-    {
-      if (Pitch > 89.0f)
-      {
+    if (ConstrainPitch) {
+      if (Pitch > 89.0f) {
         Pitch = 89.0f;
       }
-      if (Pitch < -89.0f)
-      {
+      if (Pitch < -89.0f) {
         Pitch = -89.0f;
       }
     }
@@ -60,44 +65,34 @@ struct Camera
   void ProcessKeyboard(CameraMovement Direction, float DeltaTime)
   {
     float Velocity = MovementSpeed * DeltaTime;
-    if (Direction == FORWARD)
-    {
+    if (Direction == FORWARD) {
       Position += Front * Velocity;
     }
-    if (Direction == BACKWARD)
-    {
+    if (Direction == BACKWARD) {
       Position -= Front * Velocity;
     }
-    if (Direction == LEFT)
-    {
+    if (Direction == LEFT) {
       Position -= Right * Velocity;
     }
-    if (Direction == RIGHT)
-    {
+    if (Direction == RIGHT) {
       Position += Right * Velocity;
     }
   }
 
   void ProcessMouseScroll(float YOffset)
   {
-    if (Zoom >= 1.0f && Zoom <= 45.0f)
-    {
+    if (Zoom >= 1.0f && Zoom <= 45.0f) {
       Zoom -= YOffset;
     }
-    if (Zoom <= 1.0f)
-    {
+    if (Zoom <= 1.0f) {
       Zoom = 1.0f;
     }
-    if (Zoom >= 45.0f)
-    {
+    if (Zoom >= 45.0f) {
       Zoom = 45.0f;
     }
   }
 
-  glm::mat4 ViewMatrix()
-  {
-    return glm::lookAt(Position, Position + Front, Up);
-  }
+  glm::mat4 ViewMatrix() { return glm::lookAt(Position, Position + Front, Up); }
 
   void UpdateVectors()
   {
