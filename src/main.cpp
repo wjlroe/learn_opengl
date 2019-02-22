@@ -551,8 +551,8 @@ main()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  int ScreenWidth = 800;
-  int ScreenHeight = 600;
+  int ScreenWidth = 1920;
+  int ScreenHeight = 1080;
   GLFWwindow* Window =
     glfwCreateWindow(ScreenWidth, ScreenHeight, "LearnOpenGL", NULL, NULL);
   if (Window == NULL) {
@@ -616,7 +616,7 @@ main()
   GlobalWindowState.MouseLastFrame = {};
   GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
   GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
-  GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+  GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
   GlobalWindowState.LampResources = LampResources;
   GlobalWindowState.LightingResources = LightingResources;
   GlobalWindowState.ModelToDraw = &CrysisNanoSuit;
