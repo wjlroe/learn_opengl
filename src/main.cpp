@@ -107,11 +107,10 @@ DrawRectangle(DrawResources Resources,
 }
 
 void
-DrawCube(DrawResources Resources)
+DrawCube(DrawResources Resources, Shader* CubeShader, glm::mat4 ModelMatrix)
 {
-  Shader* SimpleShader = Resources.Shader;
-
-  SimpleShader->use();
+  CubeShader->use();
+  CubeShader->setMat4("model", ModelMatrix);
 
   if (Resources.texture1) {
     glActiveTexture(GL_TEXTURE0);
@@ -158,7 +157,9 @@ struct WindowState
   DrawResources LightingResources;
   Model* ModelToDraw;
   Shader* ModelShader;
+  Shader* SingleColor;
   glm::mat4 ProjectionMatrix;
+  bool OutlineCubes;
 
   void ProcessInput(float DeltaTime)
   {
@@ -177,6 +178,9 @@ struct WindowState
     }
     if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS) {
       Camera.ProcessKeyboard(RIGHT, DeltaTime);
+    }
+    if (glfwGetKey(Window, GLFW_KEY_O) == GLFW_PRESS) {
+      OutlineCubes = !OutlineCubes;
     }
 
     MouseLastFrame.X = MouseCurrentFrame.X;
@@ -267,6 +271,11 @@ struct WindowState
     Shader->setFloat("spotLight.cutoff", glm::cos(glm::radians(12.5f)));
     Shader->setFloat("spotLight.outerCutoff", glm::cos(glm::radians(15.0f)));
 
+    if (OutlineCubes) {
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);
+      glStencilMask(0xFF);
+    }
+
     glm::vec3 CubePositions[] = {
       glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
       glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -281,9 +290,31 @@ struct WindowState
       float Angle = 20.0f * i;
       ModelMatrix = glm::rotate(
         ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      Shader->setMat4("model", ModelMatrix);
-      DrawCube(Resources);
+      DrawCube(Resources, Resources.Shader, ModelMatrix);
       i++;
+    }
+
+    if (OutlineCubes) {
+      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+      glStencilMask(0x00);
+      glDisable(GL_DEPTH_TEST);
+
+      float scale = 1.1;
+      int i = 0;
+      for (glm::vec3 CubePosition : CubePositions) {
+        glm::mat4 ModelMatrix = glm::mat4(1.0f);
+        ModelMatrix = glm::translate(ModelMatrix, CubePosition);
+        ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scale, scale, scale));
+        float Angle = 20.0f * i;
+        ModelMatrix = glm::rotate(
+          ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        DrawCube(Resources, SingleColor, ModelMatrix);
+        i++;
+      }
+
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);
+      glStencilMask(0xFF);
+      glEnable(GL_DEPTH_TEST);
     }
   }
 
@@ -299,8 +330,7 @@ struct WindowState
     glm::mat4 ModelMatrix = glm::mat4(1.0f);
     ModelMatrix = glm::translate(ModelMatrix, Position);
     ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f));
-    Shader->setMat4("model", ModelMatrix);
-    DrawCube(Resources);
+    DrawCube(Resources, Resources.Shader, ModelMatrix);
   }
 
   void Render()
@@ -313,7 +343,11 @@ struct WindowState
     glm::mat4 ViewMatrix = Camera.ViewMatrix();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    SingleColor->use();
+    SingleColor->setMat4("projection", PerspectiveProjectionMatrix);
+    SingleColor->setMat4("view", ViewMatrix);
 
     glm::vec3 pointLightPositions[] = {
       glm::vec3(0.7f, 0.2f, 2.0f),
@@ -580,6 +614,8 @@ main()
   }
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_STENCIL_TEST);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
   {
     int NumAttributes;
@@ -593,6 +629,8 @@ main()
   Shader LampShader("../src/shaders/lamp.vert", "../src/shaders/lamp.frag");
   Shader ModelLoadingShader("../src/shaders/model_loading.vert",
                             "../src/shaders/model_loading.frag");
+  Shader SingleColor("../src/shaders/single_color.vert",
+                     "../src/shaders/single_color.frag");
 
   stbi_set_flip_vertically_on_load(true);
 
@@ -621,6 +659,8 @@ main()
   GlobalWindowState.LightingResources = LightingResources;
   GlobalWindowState.ModelToDraw = &CrysisNanoSuit;
   GlobalWindowState.ModelShader = &ModelLoadingShader;
+  GlobalWindowState.SingleColor = &SingleColor;
+  GlobalWindowState.OutlineCubes = false;
   glfwGetFramebufferSize(
     Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 
