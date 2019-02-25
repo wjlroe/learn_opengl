@@ -141,7 +141,7 @@ SetupCubeResources(unsigned int NumVertices,
   Resources.VAO = VAO;
   Resources.VBO = VBO;
   Resources.EBO = EBO;
-  Resources.NumTriangles = NumVertices;
+  Resources.NumTriangles = NumIndices;
   return Resources;
 }
 
