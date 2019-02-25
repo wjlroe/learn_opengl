@@ -1,46 +1,37 @@
 #include "common.h"
 
-static const float QuadVertices[] = {
-  1.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top right
-  1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
-  -1.0f, 1.0f,  0.0f, 0.0f, 1.0f
-}; // top left
-
-static const unsigned int QuadIndices[] = { 0, 1, 3, 1, 2, 3 };
-
 // clang-format off
 static const float CubeVertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+  // positions          // texture coords
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 };
 // clang-format on
 
@@ -53,13 +44,33 @@ static const unsigned int CubeIndices[] = {
   20, 21, 22, 22, 23, 20, // back
 };
 
+static const float QuadVertices[] = {
+  1.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top right
+  1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+  -1.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+}; // top left
+
+static const unsigned int QuadIndices[] = { 0, 1, 3, 1, 2, 3 };
+
+// clang-format off
+float PlaneVertices[] = {
+  // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+   5.0f, -0.5f, -5.0f,  2.0f, 2.0f,
+   5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+  -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+  -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+};
+// clang-format on
+
+static const unsigned int PlaneIndices[] = { 0, 1, 3, 1, 2, 3 };
+
 static glm::vec3 LightPos = glm::vec3(1.2f, 1.0f, 2.0f);
 
 enum DEBUG_IDS
 {
   DEBUG_CUBES,
-  DEBUG_LIGHT_SOURCE,
-  DEBUG_NANOSUIT,
+  DEBUG_FLOOR,
 };
 
 struct DrawResources
@@ -70,40 +81,68 @@ struct DrawResources
   unsigned int texture1;
   unsigned int texture2;
   unsigned int texture3;
-  struct Shader* Shader;
+  unsigned int NumTriangles;
 };
 
-void
-DrawRectangle(DrawResources Resources,
-              glm::mat4 ViewMatrix,
-              glm::mat4 ProjectionMatrix)
+DrawResources
+SetupCubeResources(unsigned int NumVertices,
+                   const float Vertices[],
+                   unsigned int NumIndices,
+                   const unsigned int Indices[])
 {
-  Shader* Shader = Resources.Shader;
+  int aPosLocation = 0;
+  int aPosSize = 3;
+  int aTexCoordLocation = 1;
+  int aTexCoordSize = 2;
+  int stride = aPosSize + aTexCoordSize;
 
-  Shader->use();
-  Shader->setMat4("view", ViewMatrix);
-  Shader->setMat4("projection", ProjectionMatrix);
+  unsigned int VAO;
+  glGenVertexArrays(1, &VAO);
 
-  if (Resources.texture1) {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture1);
-  }
-  if (Resources.texture2) {
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture2);
-  }
-  if (Resources.texture3) {
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, Resources.texture3);
-  }
+  unsigned int VBO;
+  glGenBuffers(1, &VBO);
 
-  glBindVertexArray(Resources.VAO);
+  glBindVertexArray(VAO);
 
-  // Draw in wireframe mode
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER,
+               stride * NumVertices * sizeof(Vertices[0]),
+               Vertices,
+               GL_STATIC_DRAW);
 
-  int NumTriangles = 6;
-  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               NumIndices * sizeof(Indices[0]),
+               Indices,
+               GL_STATIC_DRAW);
+
+  glVertexAttribPointer(aPosLocation,
+                        aPosSize,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        stride * sizeof(Vertices[0]),
+                        (void*)0);
+  glEnableVertexAttribArray(aPosLocation);
+  glVertexAttribPointer(aTexCoordLocation,
+                        aTexCoordSize,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        stride * sizeof(Vertices[0]),
+                        (void*)(aPosSize * sizeof(Vertices[0])));
+  glEnableVertexAttribArray(aTexCoordLocation);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  DrawResources Resources = {};
+  Resources.VAO = VAO;
+  Resources.VBO = VBO;
+  Resources.EBO = EBO;
+  Resources.NumTriangles = NumVertices;
+  return Resources;
 }
 
 void
@@ -127,8 +166,7 @@ DrawCube(DrawResources Resources, Shader* CubeShader, glm::mat4 ModelMatrix)
 
   glBindVertexArray(Resources.VAO);
 
-  int NumTriangles = 36;
-  glDrawElements(GL_TRIANGLES, NumTriangles, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, Resources.NumTriangles, GL_UNSIGNED_INT, 0);
 }
 
 struct MouseState
@@ -153,12 +191,10 @@ struct WindowState
   MouseState MouseLastFrame;
   MouseState MouseCurrentFrame;
   struct MouseScrollState MouseScrollState;
-  DrawResources LampResources;
-  DrawResources LightingResources;
-  Model* ModelToDraw;
-  Shader* ModelShader;
-  Shader* SingleColor;
-  glm::mat4 ProjectionMatrix;
+  DrawResources CubeResources;
+  DrawResources PlaneResources;
+  Shader* DepthTestingShader;
+  glm::mat4 ProjectionMatrix; // TODO: Do we need this?
   bool OutlineCubes;
 
   void ProcessInput(float DeltaTime)
@@ -201,194 +237,48 @@ struct WindowState
   }
 
   void DrawAllTheCubes(DrawResources Resources,
+                       Shader* Shader,
                        glm::mat4 ViewMatrix,
-                       glm::mat4 ProjectionMatrix,
-                       glm::vec3 pointLightPositions[])
+                       glm::mat4 ProjectionMatrix)
   {
-    Shader* Shader = Resources.Shader;
-    Shader->use();
-    Shader->setMat4("view", ViewMatrix);
-    Shader->setMat4("projection", ProjectionMatrix);
-    Shader->setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-    Shader->setVec3("viewPos", Camera.Position);
-    Shader->setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-    Shader->setInt("material.diffuse", 0);
-    Shader->setInt("material.specular", 1);
-    // Shader->setInt("material.emission", 2);
-    Shader->setFloat("material.shininess", 32.0f);
-
-    // directional light
-    Shader->setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    Shader->setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    Shader->setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-    Shader->setVec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-
-    // point light 1
-    Shader->setVec3("pointLights[0].position", pointLightPositions[0]);
-    Shader->setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    Shader->setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    Shader->setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setFloat("pointLights[0].constant", 1.0f);
-    Shader->setFloat("pointLights[0].linear", 0.09f);
-    Shader->setFloat("pointLights[0].quadratic", 0.032f);
-
-    // point light 2
-    Shader->setVec3("pointLights[1].position", pointLightPositions[1]);
-    Shader->setVec3("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    Shader->setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    Shader->setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setFloat("pointLights[1].constant", 1.0f);
-    Shader->setFloat("pointLights[1].linear", 0.09f);
-    Shader->setFloat("pointLights[1].quadratic", 0.032f);
-
-    // point light 3
-    Shader->setVec3("pointLights[2].position", pointLightPositions[2]);
-    Shader->setVec3("pointLights[2].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    Shader->setVec3("pointLights[2].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    Shader->setVec3("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setFloat("pointLights[2].constant", 1.0f);
-    Shader->setFloat("pointLights[2].linear", 0.09f);
-    Shader->setFloat("pointLights[2].quadratic", 0.032f);
-
-    // point light 4
-    Shader->setVec3("pointLights[3].position", pointLightPositions[3]);
-    Shader->setVec3("pointLights[3].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    Shader->setVec3("pointLights[3].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    Shader->setVec3("pointLights[3].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setFloat("pointLights[3].constant", 1.0f);
-    Shader->setFloat("pointLights[3].linear", 0.09f);
-    Shader->setFloat("pointLights[3].quadratic", 0.032f);
-
-    // spotlight
-    Shader->setVec3("spotLight.position", Camera.Position);
-    Shader->setVec3("spotLight.direction", Camera.Front);
-    Shader->setVec3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-    Shader->setVec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setVec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    Shader->setFloat("spotLight.constant", 1.0f);
-    Shader->setFloat("spotLight.linear", 0.09f);
-    Shader->setFloat("spotLight.quadratic", 0.032f);
-    Shader->setFloat("spotLight.cutoff", glm::cos(glm::radians(12.5f)));
-    Shader->setFloat("spotLight.outerCutoff", glm::cos(glm::radians(15.0f)));
-
-    if (OutlineCubes) {
-      glStencilFunc(GL_ALWAYS, 1, 0xFF);
-      glStencilMask(0xFF);
-    }
-
     glm::vec3 CubePositions[] = {
-      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
-      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
-      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
-      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
-      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)
+      glm::vec3(-1.0f, 0.0f, -1.0f),
+      glm::vec3(2.0f, 0.0f, 0.0f),
     };
-    int i = 0;
+
     for (glm::vec3 CubePosition : CubePositions) {
       glm::mat4 ModelMatrix = glm::mat4(1.0f);
       ModelMatrix = glm::translate(ModelMatrix, CubePosition);
-      float Angle = 20.0f * i;
-      ModelMatrix = glm::rotate(
-        ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      DrawCube(Resources, Resources.Shader, ModelMatrix);
-      i++;
+      DrawCube(Resources, Shader, ModelMatrix);
     }
-
-    if (OutlineCubes) {
-      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-      glStencilMask(0x00);
-      glDisable(GL_DEPTH_TEST);
-
-      float scale = 1.1;
-      int i = 0;
-      for (glm::vec3 CubePosition : CubePositions) {
-        glm::mat4 ModelMatrix = glm::mat4(1.0f);
-        ModelMatrix = glm::translate(ModelMatrix, CubePosition);
-        ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scale, scale, scale));
-        float Angle = 20.0f * i;
-        ModelMatrix = glm::rotate(
-          ModelMatrix, glm::radians(Angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        DrawCube(Resources, SingleColor, ModelMatrix);
-        i++;
-      }
-
-      glStencilFunc(GL_ALWAYS, 1, 0xFF);
-      glStencilMask(0xFF);
-      glEnable(GL_DEPTH_TEST);
-    }
-  }
-
-  void DrawLightSource(DrawResources Resources,
-                       glm::mat4 ViewMatrix,
-                       glm::mat4 ProjectionMatrix,
-                       glm::vec3 Position)
-  {
-    Shader* Shader = Resources.Shader;
-    Shader->use();
-    Shader->setMat4("view", ViewMatrix);
-    Shader->setMat4("projection", ProjectionMatrix);
-    glm::mat4 ModelMatrix = glm::mat4(1.0f);
-    ModelMatrix = glm::translate(ModelMatrix, Position);
-    ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f));
-    DrawCube(Resources, Resources.Shader, ModelMatrix);
   }
 
   void Render()
   {
-    // glm::mat4 IdentityMatrix = glm::mat4(1.0);
     glm::mat4 PerspectiveProjectionMatrix = glm::perspective(
       glm::radians(Camera.Zoom), (float)Width / (float)Height, 0.1f, 100.0f);
-    // glm::mat4 OrthoProjectionMatrix = glm::ortho(-10.0f, 10.0f,
-    // -10.0f, 10.0f, 0.1f, 100.0f);
     glm::mat4 ViewMatrix = Camera.ViewMatrix();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    SingleColor->use();
-    SingleColor->setMat4("projection", PerspectiveProjectionMatrix);
-    SingleColor->setMat4("view", ViewMatrix);
-
-    glm::vec3 pointLightPositions[] = {
-      glm::vec3(0.7f, 0.2f, 2.0f),
-      glm::vec3(2.3f, -3.3f, -4.0f),
-      glm::vec3(-4.0f, 2.0f, -12.0f),
-      glm::vec3(0.0f, 0.0f, -3.0f),
-    };
+    DepthTestingShader->use();
+    DepthTestingShader->setMat4("projection", PerspectiveProjectionMatrix);
+    DepthTestingShader->setMat4("view", ViewMatrix);
 
     {
-      glPushDebugGroup(
-        GL_DEBUG_SOURCE_APPLICATION, DEBUG_NANOSUIT, -1, "Nanosuit");
-      ModelShader->use();
-      ModelShader->setMat4("projection", PerspectiveProjectionMatrix);
-      ModelShader->setMat4("view", ViewMatrix);
-
-      glm::mat4 NanoSuitModel = glm::mat4(1.0f);
-      NanoSuitModel =
-        glm::translate(NanoSuitModel, glm::vec3(-1.8f, -1.75f, 0.0f));
-      NanoSuitModel = glm::scale(NanoSuitModel, glm::vec3(0.2f, 0.2f, 0.2f));
-      ModelShader->setMat4("model", NanoSuitModel);
-      ModelToDraw->Draw(*ModelShader);
-      glPopDebugGroup();
-    }
-
-    {
-      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "A Cube");
-      DrawAllTheCubes(LightingResources,
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "Cubes");
+      DrawAllTheCubes(CubeResources,
+                      DepthTestingShader,
                       ViewMatrix,
-                      PerspectiveProjectionMatrix,
-                      pointLightPositions);
+                      PerspectiveProjectionMatrix);
       glPopDebugGroup();
     }
 
     {
-      glPushDebugGroup(
-        GL_DEBUG_SOURCE_APPLICATION, DEBUG_LIGHT_SOURCE, -1, "LightSource");
-      for (int i = 0; i < 4; i++) {
-        glm::vec3 pointLight = pointLightPositions[i];
-        DrawLightSource(
-          LampResources, ViewMatrix, PerspectiveProjectionMatrix, pointLight);
-      }
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_FLOOR, -1, "Floor");
+      glm::mat4 ModelMatrix = glm::mat4(1.0f);
+      DrawCube(PlaneResources, DepthTestingShader, ModelMatrix);
       glPopDebugGroup();
     }
 
@@ -425,104 +315,6 @@ void
 ErrorCallback(int Error, const char* Description)
 {
   std::cout << Description << std::endl;
-}
-
-DrawResources
-SetupLightResources(Shader* Shader)
-{
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(
-    GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
-
-  unsigned int EBO;
-  glGenBuffers(1, &EBO);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER, sizeof(CubeIndices), CubeIndices, GL_STATIC_DRAW);
-
-  int aPosLocation = 0;
-  int aPosSize = 3;
-
-  glVertexAttribPointer(
-    aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(aPosLocation);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  DrawResources Resources = {};
-  Resources.VAO = VAO;
-  Resources.VBO = VBO;
-  Resources.EBO = EBO;
-  Resources.Shader = Shader;
-  return Resources;
-}
-
-DrawResources
-SetupCubeResources(Shader* Shader)
-{
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(
-    GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
-
-  unsigned int EBO;
-  glGenBuffers(1, &EBO);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER, sizeof(CubeIndices), CubeIndices, GL_STATIC_DRAW);
-
-  int aPosLocation = 0;
-  int aPosSize = 3;
-  int aNormalLocation = 1;
-  int aNormalSize = 3;
-  int aTexCoordLocation = 2;
-  int aTexCoordSize = 2;
-
-  glVertexAttribPointer(
-    aPosLocation, aPosSize, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(aPosLocation);
-  glVertexAttribPointer(aNormalLocation,
-                        aNormalSize,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        8 * sizeof(float),
-                        (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(aNormalLocation);
-  glVertexAttribPointer(aTexCoordLocation,
-                        aTexCoordSize,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        8 * sizeof(float),
-                        (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(aTexCoordLocation);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  DrawResources Resources = {};
-  Resources.VAO = VAO;
-  Resources.VBO = VBO;
-  Resources.EBO = EBO;
-  Resources.Shader = Shader;
-  return Resources;
 }
 
 void
@@ -624,29 +416,16 @@ main()
               << std::endl;
   }
 
-  Shader LightingShader("../src/shaders/lighting.vert",
-                        "../src/shaders/lighting.frag");
-  Shader LampShader("../src/shaders/lamp.vert", "../src/shaders/lamp.frag");
-  Shader ModelLoadingShader("../src/shaders/model_loading.vert",
-                            "../src/shaders/model_loading.frag");
-  Shader SingleColor("../src/shaders/single_color.vert",
-                     "../src/shaders/single_color.frag");
+  Shader DepthTestingShader("../src/shaders/depth_testing.vert",
+                            "../src/shaders/depth_testing.frag");
+  DrawResources CubeResources =
+    SetupCubeResources(24, CubeVertices, 36, CubeIndices);
+  LoadTexture(GL_TEXTURE0, &CubeResources.texture1, "../assets/marble.jpg");
+  DrawResources PlaneResources =
+    SetupCubeResources(20, PlaneVertices, 6, PlaneIndices);
+  LoadTexture(GL_TEXTURE0, &PlaneResources.texture1, "../assets/metal.jpg");
 
   stbi_set_flip_vertically_on_load(true);
-
-  DrawResources LampResources = SetupLightResources(&LampShader);
-  DrawResources LightingResources = SetupCubeResources(&LightingShader);
-
-  Model CrysisNanoSuit("../assets/meshes/nanosuit/nanosuit.obj");
-
-  // FIXME: these aren't related to the DrawResources I don't think...
-  LoadTexture(
-    GL_TEXTURE0, &LightingResources.texture1, "../assets/container2.png");
-  LoadTexture(GL_TEXTURE1,
-              &LightingResources.texture2,
-              "../assets/container2_specular.png");
-  // LoadTexture(GL_TEXTURE2, &LightingResources.texture3,
-  // "../assets/matrix.jpg");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
@@ -655,12 +434,9 @@ main()
   GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
   GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
   GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
-  GlobalWindowState.LampResources = LampResources;
-  GlobalWindowState.LightingResources = LightingResources;
-  GlobalWindowState.ModelToDraw = &CrysisNanoSuit;
-  GlobalWindowState.ModelShader = &ModelLoadingShader;
-  GlobalWindowState.SingleColor = &SingleColor;
-  GlobalWindowState.OutlineCubes = false;
+  GlobalWindowState.CubeResources = CubeResources;
+  GlobalWindowState.PlaneResources = PlaneResources;
+  GlobalWindowState.DepthTestingShader = &DepthTestingShader;
   glfwGetFramebufferSize(
     Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 
@@ -678,8 +454,8 @@ main()
     glfwPollEvents();
   }
 
-  CleanupDrawResources(LightingResources);
-  CleanupDrawResources(LampResources);
+  CleanupDrawResources(CubeResources);
+  CleanupDrawResources(PlaneResources);
 
   glfwTerminate();
   return 0;
