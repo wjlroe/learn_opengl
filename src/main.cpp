@@ -235,10 +235,7 @@ struct WindowState
     Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
   }
 
-  void DrawAllTheCubes(DrawResources Resources,
-                       Shader* Shader,
-                       glm::mat4 ViewMatrix,
-                       glm::mat4 ProjectionMatrix)
+  void DrawAllTheCubes(DrawResources Resources, Shader* Shader)
   {
     glm::vec3 CubePositions[] = {
       glm::vec3(-1.0f, 0.0f, -1.0f),
@@ -267,10 +264,7 @@ struct WindowState
 
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "Cubes");
-      DrawAllTheCubes(CubeResources,
-                      DepthTestingShader,
-                      ViewMatrix,
-                      PerspectiveProjectionMatrix);
+      DrawAllTheCubes(CubeResources, DepthTestingShader);
       glPopDebugGroup();
     }
 
