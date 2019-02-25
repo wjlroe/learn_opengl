@@ -194,7 +194,6 @@ struct WindowState
   DrawResources CubeResources;
   DrawResources PlaneResources;
   Shader* DepthTestingShader;
-  glm::mat4 ProjectionMatrix; // TODO: Do we need this?
   bool OutlineCubes;
 
   void ProcessInput(float DeltaTime)
