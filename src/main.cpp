@@ -71,6 +71,7 @@ enum DEBUG_IDS
 {
   DEBUG_CUBES,
   DEBUG_FLOOR,
+  DEBUG_GRASS,
 };
 
 struct DrawResources
@@ -193,6 +194,7 @@ struct WindowState
   struct MouseScrollState MouseScrollState;
   DrawResources CubeResources;
   DrawResources PlaneResources;
+  DrawResources QuadResources;
   Shader* DepthTestingShader;
   bool OutlineCubes;
 
@@ -275,6 +277,22 @@ struct WindowState
       glPopDebugGroup();
     }
 
+    {
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_GRASS, -1, "Grass");
+      float moveUp = 0.5;
+      glm::vec3 GrassPositions[] = {
+        glm::vec3(-1.5f, moveUp, -0.48f), glm::vec3(1.5f, moveUp, 0.51f),
+        glm::vec3(0.0f, moveUp, 0.7f),    glm::vec3(-0.3f, moveUp, -2.3f),
+        glm::vec3(0.5f, moveUp, -0.6f),
+      };
+      for (glm::vec3 GrassPosition : GrassPositions) {
+        glm::mat4 ModelMatrix = glm::mat4(1.0f);
+        ModelMatrix = glm::translate(ModelMatrix, GrassPosition);
+        DrawCube(QuadResources, DepthTestingShader, ModelMatrix);
+      }
+      glPopDebugGroup();
+    }
+
     glfwSwapBuffers(Window);
   }
 };
@@ -343,8 +361,13 @@ LoadTexture(unsigned int TextureUnit,
                  Data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    if (NumChannels == 4) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    } else {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
     glTexParameteri(
       GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -397,6 +420,8 @@ main()
   std::cout << "Renderer: " << renderer << std::endl;
   std::cout << "OpenGL version supported: " << version << std::endl;
 
+  stbi_set_flip_vertically_on_load(true);
+
   glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
   glfwSetWindowRefreshCallback(Window, WindowRefreshCallback);
@@ -423,8 +448,9 @@ main()
   DrawResources PlaneResources =
     SetupCubeResources(20, PlaneVertices, 6, PlaneIndices);
   LoadTexture(GL_TEXTURE0, &PlaneResources.texture1, "../assets/metal.jpg");
-
-  stbi_set_flip_vertically_on_load(true);
+  DrawResources QuadResources =
+    SetupCubeResources(20, QuadVertices, 6, QuadIndices);
+  LoadTexture(GL_TEXTURE0, &QuadResources.texture1, "../assets/grass.png");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
@@ -435,6 +461,7 @@ main()
   GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
   GlobalWindowState.CubeResources = CubeResources;
   GlobalWindowState.PlaneResources = PlaneResources;
+  GlobalWindowState.QuadResources = QuadResources;
   GlobalWindowState.DepthTestingShader = &DepthTestingShader;
   glfwGetFramebufferSize(
     Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
