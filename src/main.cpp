@@ -197,6 +197,7 @@ struct WindowState
   DrawResources QuadResources;
   Shader* DepthTestingShader;
   bool OutlineCubes;
+  bool ShowEditor;
 
   void ProcessInput(float DeltaTime)
   {
@@ -204,37 +205,43 @@ struct WindowState
       glfwSetWindowShouldClose(Window, true);
     }
 
-    if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS) {
-      Camera.ProcessKeyboard(FORWARD, DeltaTime);
-    }
-    if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS) {
-      Camera.ProcessKeyboard(BACKWARD, DeltaTime);
-    }
-    if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS) {
-      Camera.ProcessKeyboard(LEFT, DeltaTime);
-    }
-    if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS) {
-      Camera.ProcessKeyboard(RIGHT, DeltaTime);
-    }
-    if (glfwGetKey(Window, GLFW_KEY_O) == GLFW_PRESS) {
-      OutlineCubes = !OutlineCubes;
+    if (glfwGetKey(Window, GLFW_KEY_F1) == GLFW_PRESS) {
+      ToggleEditor();
     }
 
-    MouseLastFrame.X = MouseCurrentFrame.X;
-    MouseLastFrame.Y = MouseCurrentFrame.Y;
-    glfwGetCursorPos(Window, &MouseCurrentFrame.X, &MouseCurrentFrame.Y);
+    if (!ShowEditor) {
+      if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS) {
+        Camera.ProcessKeyboard(FORWARD, DeltaTime);
+      }
+      if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS) {
+        Camera.ProcessKeyboard(BACKWARD, DeltaTime);
+      }
+      if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS) {
+        Camera.ProcessKeyboard(LEFT, DeltaTime);
+      }
+      if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS) {
+        Camera.ProcessKeyboard(RIGHT, DeltaTime);
+      }
+      if (glfwGetKey(Window, GLFW_KEY_O) == GLFW_PRESS) {
+        OutlineCubes = !OutlineCubes;
+      }
 
-    if (FirstMouseMove) {
       MouseLastFrame.X = MouseCurrentFrame.X;
       MouseLastFrame.Y = MouseCurrentFrame.Y;
-      FirstMouseMove = false;
+      glfwGetCursorPos(Window, &MouseCurrentFrame.X, &MouseCurrentFrame.Y);
+
+      if (FirstMouseMove) {
+        MouseLastFrame.X = MouseCurrentFrame.X;
+        MouseLastFrame.Y = MouseCurrentFrame.Y;
+        FirstMouseMove = false;
+      }
+
+      float XOffset = (float)MouseCurrentFrame.X - (float)MouseLastFrame.X;
+      float YOffset = (float)MouseLastFrame.Y - (float)MouseCurrentFrame.Y;
+
+      Camera.ProcessMouseMovement(XOffset, YOffset);
+      Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
     }
-
-    float XOffset = (float)MouseCurrentFrame.X - (float)MouseLastFrame.X;
-    float YOffset = (float)MouseLastFrame.Y - (float)MouseCurrentFrame.Y;
-
-    Camera.ProcessMouseMovement(XOffset, YOffset);
-    Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
   }
 
   void DrawAllTheCubes(DrawResources Resources, Shader* Shader)
@@ -248,6 +255,18 @@ struct WindowState
       glm::mat4 ModelMatrix = glm::mat4(1.0f);
       ModelMatrix = glm::translate(ModelMatrix, CubePosition);
       DrawCube(Resources, Shader, ModelMatrix);
+    }
+  }
+
+  void ToggleEditor()
+  {
+    ShowEditor = !ShowEditor;
+    if (ShowEditor) {
+      // unbind mouse capture
+      glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else {
+      // rebind mouse capture
+      glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
   }
 
@@ -298,6 +317,30 @@ struct WindowState
         DrawCube(QuadResources, DepthTestingShader, ModelMatrix);
       }
       glPopDebugGroup();
+    }
+
+    if (ShowEditor) {
+      static bool editor_open = false;
+      {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        if (!ImGui::Begin("Editor", &editor_open)) {
+        }
+        char buf[1024];
+        float f = 0.5f;
+        ImGui::Text("Hello, world %d", 123);
+        if (ImGui::Button("Save")) {
+          // do something
+        }
+        ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      }
     }
 
     glfwSwapBuffers(Window);
@@ -427,6 +470,10 @@ main()
   std::cout << "Renderer: " << renderer << std::endl;
   std::cout << "OpenGL version supported: " << version << std::endl;
 
+  ImGui::CreateContext();
+  ImGui_ImplGlfw_InitForOpenGL(Window, true);
+  ImGui_ImplOpenGL3_Init("#version 330 core");
+
   stbi_set_flip_vertically_on_load(true);
 
   glfwSetScrollCallback(Window, ScrollCallback);
@@ -472,6 +519,7 @@ main()
   GlobalWindowState.PlaneResources = PlaneResources;
   GlobalWindowState.QuadResources = QuadResources;
   GlobalWindowState.DepthTestingShader = &DepthTestingShader;
+  GlobalWindowState.ShowEditor = false;
   glfwGetFramebufferSize(
     Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
 
@@ -491,6 +539,10 @@ main()
 
   CleanupDrawResources(CubeResources);
   CleanupDrawResources(PlaneResources);
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
 
   glfwTerminate();
   return 0;
