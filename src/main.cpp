@@ -71,7 +71,7 @@ enum DEBUG_IDS
 {
   DEBUG_CUBES,
   DEBUG_FLOOR,
-  DEBUG_GRASS,
+  DEBUG_WINDOW,
 };
 
 struct DrawResources
@@ -278,16 +278,23 @@ struct WindowState
     }
 
     {
-      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_GRASS, -1, "Grass");
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_WINDOW, -1, "Window");
       float moveUp = 0.5;
-      glm::vec3 GrassPositions[] = {
+      glm::vec3 WindowPositions[] = {
         glm::vec3(-1.5f, moveUp, -0.48f), glm::vec3(1.5f, moveUp, 0.51f),
         glm::vec3(0.0f, moveUp, 0.7f),    glm::vec3(-0.3f, moveUp, -2.3f),
         glm::vec3(0.5f, moveUp, -0.6f),
       };
-      for (glm::vec3 GrassPosition : GrassPositions) {
+      std::sort(std::begin(WindowPositions),
+                std::end(WindowPositions),
+                [this](glm::vec3 a, glm::vec3 b) {
+                  float distance_a = glm::length(Camera.Position - a);
+                  float distance_b = glm::length(Camera.Position - b);
+                  return distance_a > distance_b;
+                });
+      for (glm::vec3 WindowPosition : WindowPositions) {
         glm::mat4 ModelMatrix = glm::mat4(1.0f);
-        ModelMatrix = glm::translate(ModelMatrix, GrassPosition);
+        ModelMatrix = glm::translate(ModelMatrix, WindowPosition);
         DrawCube(QuadResources, DepthTestingShader, ModelMatrix);
       }
       glPopDebugGroup();
@@ -429,9 +436,9 @@ main()
     glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_STENCIL_TEST);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
   {
     int NumAttributes;
@@ -450,7 +457,9 @@ main()
   LoadTexture(GL_TEXTURE0, &PlaneResources.texture1, "../assets/metal.jpg");
   DrawResources QuadResources =
     SetupCubeResources(20, QuadVertices, 6, QuadIndices);
-  LoadTexture(GL_TEXTURE0, &QuadResources.texture1, "../assets/grass.png");
+  LoadTexture(GL_TEXTURE0,
+              &QuadResources.texture1,
+              "../assets/blending_transparent_window.png");
 
   GlobalWindowState.Window = Window;
   GlobalWindowState.FirstMouseMove = true;
