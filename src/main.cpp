@@ -201,14 +201,6 @@ struct WindowState
 
   void ProcessInput(float DeltaTime)
   {
-    if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-      glfwSetWindowShouldClose(Window, true);
-    }
-
-    if (glfwGetKey(Window, GLFW_KEY_F1) == GLFW_PRESS) {
-      ToggleEditor();
-    }
-
     if (!ShowEditor) {
       if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS) {
         Camera.ProcessKeyboard(FORWARD, DeltaTime);
@@ -221,9 +213,6 @@ struct WindowState
       }
       if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS) {
         Camera.ProcessKeyboard(RIGHT, DeltaTime);
-      }
-      if (glfwGetKey(Window, GLFW_KEY_O) == GLFW_PRESS) {
-        OutlineCubes = !OutlineCubes;
       }
 
       MouseLastFrame.X = MouseCurrentFrame.X;
@@ -241,6 +230,25 @@ struct WindowState
 
       Camera.ProcessMouseMovement(XOffset, YOffset);
       Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
+    }
+  }
+
+  void ProcessKeyInput(int Key, int Scancode, int Action, int Mods, int LastKey)
+  {
+    if ((Key == GLFW_KEY_F1) && (Action == GLFW_PRESS) && (LastKey != Key)) {
+      ToggleEditor();
+    }
+
+    if (ShowEditor) {
+      if ((Key == GLFW_KEY_ESCAPE) && (Action == GLFW_PRESS) &&
+          (LastKey != Key)) {
+        ToggleEditor();
+      }
+    } else {
+      if ((Key == GLFW_KEY_ESCAPE) && (Action == GLFW_PRESS) &&
+          (LastKey != Key)) {
+        glfwSetWindowShouldClose(Window, true);
+      }
     }
   }
 
@@ -367,6 +375,20 @@ FramebufferSizeCallback(GLFWwindow* Window, int Width, int Height)
 }
 
 void
+KeyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
+{
+  static int LastKey = 0;
+
+  GlobalWindowState.ProcessKeyInput(Key, Scancode, Action, Mods, LastKey);
+
+  if ((Action == GLFW_RELEASE) || (Action == GLFW_REPEAT)) {
+    LastKey = 0;
+  } else {
+    LastKey = Key;
+  }
+}
+
+void
 WindowRefreshCallback(GLFWwindow* Window)
 {
   GlobalWindowState.Render();
@@ -479,6 +501,7 @@ main()
   glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
   glfwSetWindowRefreshCallback(Window, WindowRefreshCallback);
+  glfwSetKeyCallback(Window, KeyCallback);
   if (CAPTURE_MOUSE) {
     glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
