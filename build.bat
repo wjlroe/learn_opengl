@@ -18,6 +18,7 @@ cd %BUILD_PATH%
 IF NOT EXIST build mkdir build
 pushd build
 IF NOT EXIST glfw3.dll copy %GLFW_LIB_PATH%\glfw3.dll .
+REM SET CL=/DGEN_CONVERT_ELEMENTS_FROM_VERTICES#1
 cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc ..\src\main.cpp -I ..\include^
  -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui^
  /link %GLFW_LIB_PATH%\glfw3.lib %GLFW_LIB_PATH%\glfw3dll.lib opengl32.lib^

@@ -1,5 +1,9 @@
 #include "common.h"
 
+#ifdef GEN_CONVERT_ELEMENTS_FROM_VERTICES
+#include "vertices_to_elements.cpp"
+#endif
+
 // clang-format off
 static const float CubeVertices[] = {
  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f,
@@ -446,6 +450,10 @@ CleanupDrawResources(DrawResources Resources)
 int
 main()
 {
+#ifdef GEN_CONVERT_ELEMENTS_FROM_VERTICES
+  genCubeIndices();
+#endif
+
   glfwInit();
   glfwSetErrorCallback(ErrorCallback);
 
