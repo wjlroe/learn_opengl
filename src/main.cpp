@@ -283,7 +283,9 @@ struct WindowState
 
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CUBES, -1, "Cubes");
+      glEnable(GL_CULL_FACE);
       DrawAllTheCubes(CubeResources, DepthTestingShader);
+      glDisable(GL_CULL_FACE);
       glPopDebugGroup();
     }
 
@@ -503,6 +505,7 @@ main()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
 
   {
     int NumAttributes;
