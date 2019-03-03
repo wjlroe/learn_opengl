@@ -172,7 +172,7 @@ struct MouseScrollState
   double YOffset;
 };
 
-struct WindowState
+struct GameState
 {
   GLFWwindow* Window;
   int Width;
@@ -353,22 +353,22 @@ struct WindowState
 };
 
 const static bool CAPTURE_MOUSE = true;
-static WindowState GlobalWindowState;
+static GameState GlobalGameState;
 
 void
 ScrollCallback(GLFWwindow* Window, double XOffset, double YOffset)
 {
-  GlobalWindowState.MouseScrollState.XOffset = XOffset;
-  GlobalWindowState.MouseScrollState.YOffset = YOffset;
+  GlobalGameState.MouseScrollState.XOffset = XOffset;
+  GlobalGameState.MouseScrollState.YOffset = YOffset;
 }
 
 void
 FramebufferSizeCallback(GLFWwindow* Window, int Width, int Height)
 {
-  GlobalWindowState.Width = Width;
-  GlobalWindowState.Height = Height;
-  glViewport(0, 0, GlobalWindowState.Width, GlobalWindowState.Height);
-  GlobalWindowState.Render();
+  GlobalGameState.Width = Width;
+  GlobalGameState.Height = Height;
+  glViewport(0, 0, GlobalGameState.Width, GlobalGameState.Height);
+  GlobalGameState.Render();
 }
 
 void
@@ -376,7 +376,7 @@ KeyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
 {
   static int LastKey = 0;
 
-  GlobalWindowState.ProcessKeyInput(Key, Scancode, Action, Mods, LastKey);
+  GlobalGameState.ProcessKeyInput(Key, Scancode, Action, Mods, LastKey);
 
   if ((Action == GLFW_RELEASE) || (Action == GLFW_REPEAT)) {
     LastKey = 0;
@@ -388,7 +388,7 @@ KeyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
 void
 WindowRefreshCallback(GLFWwindow* Window)
 {
-  GlobalWindowState.Render();
+  GlobalGameState.Render();
 }
 
 void
@@ -474,6 +474,8 @@ main()
 
   int ScreenWidth = 1920;
   int ScreenHeight = 1080;
+  bool WindowMaximized = false;
+  glfwWindowHint(GLFW_MAXIMIZED, WindowMaximized);
   GLFWwindow* Window =
     glfwCreateWindow(ScreenWidth, ScreenHeight, "LearnOpenGL", NULL, NULL);
   if (Window == NULL) {
@@ -533,20 +535,20 @@ main()
               &QuadResources.texture1,
               "../assets/blending_transparent_window.png");
 
-  GlobalWindowState.Window = Window;
-  GlobalWindowState.FirstMouseMove = true;
-  GlobalWindowState.MouseCurrentFrame = {};
-  GlobalWindowState.MouseLastFrame = {};
-  GlobalWindowState.MouseCurrentFrame.X = ScreenWidth / 2;
-  GlobalWindowState.MouseCurrentFrame.Y = ScreenHeight / 2;
-  GlobalWindowState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
-  GlobalWindowState.CubeResources = CubeResources;
-  GlobalWindowState.PlaneResources = PlaneResources;
-  GlobalWindowState.QuadResources = QuadResources;
-  GlobalWindowState.DepthTestingShader = &DepthTestingShader;
-  GlobalWindowState.ShowEditor = false;
+  GlobalGameState.Window = Window;
+  GlobalGameState.FirstMouseMove = true;
+  GlobalGameState.MouseCurrentFrame = {};
+  GlobalGameState.MouseLastFrame = {};
+  GlobalGameState.MouseCurrentFrame.X = ScreenWidth / 2;
+  GlobalGameState.MouseCurrentFrame.Y = ScreenHeight / 2;
+  GlobalGameState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+  GlobalGameState.CubeResources = CubeResources;
+  GlobalGameState.PlaneResources = PlaneResources;
+  GlobalGameState.QuadResources = QuadResources;
+  GlobalGameState.DepthTestingShader = &DepthTestingShader;
+  GlobalGameState.ShowEditor = false;
   glfwGetFramebufferSize(
-    Window, &GlobalWindowState.Width, &GlobalWindowState.Height);
+    Window, &GlobalGameState.Width, &GlobalGameState.Height);
 
   float DeltaTime = 0.0f;
   float LastFrame = 0.0f;
@@ -556,9 +558,9 @@ main()
     DeltaTime = CurrentFrame - LastFrame;
     LastFrame = CurrentFrame;
 
-    GlobalWindowState.ProcessInput(DeltaTime);
+    GlobalGameState.ProcessInput(DeltaTime);
 
-    GlobalWindowState.Render();
+    GlobalGameState.Render();
     glfwPollEvents();
   }
 
