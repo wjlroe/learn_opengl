@@ -225,6 +225,11 @@ struct WindowState
 
   void ProcessKeyInput(int Key, int Scancode, int Action, int Mods, int LastKey)
   {
+    if ((Key == GLFW_KEY_Q) && (Action == GLFW_PRESS) && (LastKey != Key) &&
+        (Mods & GLFW_MOD_CONTROL)) {
+      glfwSetWindowShouldClose(Window, true);
+    }
+
     if ((Key == GLFW_KEY_F1) && (Action == GLFW_PRESS) && (LastKey != Key)) {
       ToggleEditor();
     }
