@@ -3,23 +3,44 @@
 set start=%time%
 set BUILD_PATH=%~dp0
 
+IF NOT DEFINED build32 (SET build32=false)
+echo build32 is %build32%
+
 SET /A errno=0
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+IF %build32% == true (
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+) ELSE (
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+)
 
-set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN64\include"
-set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN64\lib-vc2015"
+IF %build32% == true (
+  set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN32\include"
+  set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN32\lib-vc2015"
+) ELSE (
+  set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN64\include"
+  set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN64\lib-vc2015"
+)
+
 set ASSIMP_INCLUDE_PATH="C:\dev\assimp-4.1.0\include"
 set ASSIMP_LIB_PATH="C:\dev\assimp-4.1.0\lib\Release"
 
 set build_message=BUILD_PATH is %BUILD_PATH%
 echo %build_message%
 cd %BUILD_PATH%
-IF NOT EXIST build mkdir build
-pushd build
+
+IF %build32% == true (
+  set build_dir="build32"
+  set build_flags="/MT"
+) ELSE (
+  set build_dir="build"
+  set build_flags=""
+)
+IF NOT EXIST %build_dir% mkdir %build_dir%
+pushd %build_dir%
 IF NOT EXIST glfw3.dll copy %GLFW_LIB_PATH%\glfw3.dll .
 REM SET CL=/DGEN_CONVERT_ELEMENTS_FROM_VERTICES#1
-cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc ..\src\main.cpp -I ..\include^
+cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc %build_flags:"=% ..\src\main.cpp -I ..\include^
  -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui^
  /link %GLFW_LIB_PATH%\glfw3.lib %GLFW_LIB_PATH%\glfw3dll.lib opengl32.lib^
  glu32.lib %ASSIMP_LIB_PATH%\assimp-vc140-mt.lib /SUBSYSTEM:CONSOLE
