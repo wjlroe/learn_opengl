@@ -172,9 +172,17 @@ struct MouseScrollState
   double YOffset;
 };
 
+struct WindowState
+{
+  int WindowWidth;
+  int WindowHeight;
+  bool Maximized;
+};
+
 struct GameState
 {
   GLFWwindow* Window;
+  struct WindowState WindowState;
   int Width;
   int Height;
   struct Camera Camera;
@@ -372,6 +380,16 @@ FramebufferSizeCallback(GLFWwindow* Window, int Width, int Height)
 }
 
 void
+WindowSizeCallback(GLFWwindow* Window, int Width, int Height)
+{
+  GlobalGameState.WindowState.WindowWidth = Width;
+  GlobalGameState.WindowState.WindowHeight = Height;
+  GlobalGameState.WindowState.Maximized =
+    glfwGetWindowAttrib(Window, GLFW_MAXIMIZED);
+  GlobalGameState.Render();
+}
+
+void
 KeyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
 {
   static int LastKey = 0;
@@ -472,12 +490,17 @@ main()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  int ScreenWidth = 1920;
-  int ScreenHeight = 1080;
-  bool WindowMaximized = false;
-  glfwWindowHint(GLFW_MAXIMIZED, WindowMaximized);
-  GLFWwindow* Window =
-    glfwCreateWindow(ScreenWidth, ScreenHeight, "LearnOpenGL", NULL, NULL);
+  struct WindowState WindowState;
+  WindowState.WindowWidth = 1920;
+  WindowState.WindowHeight = 1080;
+  WindowState.Maximized = false;
+
+  glfwWindowHint(GLFW_MAXIMIZED, WindowState.Maximized);
+  GLFWwindow* Window = glfwCreateWindow(WindowState.WindowWidth,
+                                        WindowState.WindowHeight,
+                                        "LearnOpenGL",
+                                        NULL,
+                                        NULL);
   if (Window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
@@ -503,6 +526,7 @@ main()
 
   glfwSetScrollCallback(Window, ScrollCallback);
   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
+  glfwSetWindowSizeCallback(Window, WindowSizeCallback);
   glfwSetWindowRefreshCallback(Window, WindowRefreshCallback);
   glfwSetKeyCallback(Window, KeyCallback);
   if (CAPTURE_MOUSE) {
@@ -536,11 +560,12 @@ main()
               "../assets/blending_transparent_window.png");
 
   GlobalGameState.Window = Window;
+  GlobalGameState.WindowState = WindowState;
   GlobalGameState.FirstMouseMove = true;
   GlobalGameState.MouseCurrentFrame = {};
   GlobalGameState.MouseLastFrame = {};
-  GlobalGameState.MouseCurrentFrame.X = ScreenWidth / 2;
-  GlobalGameState.MouseCurrentFrame.Y = ScreenHeight / 2;
+  GlobalGameState.MouseCurrentFrame.X = WindowState.WindowWidth / 2;
+  GlobalGameState.MouseCurrentFrame.Y = WindowState.WindowHeight / 2;
   GlobalGameState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
   GlobalGameState.CubeResources = CubeResources;
   GlobalGameState.PlaneResources = PlaneResources;

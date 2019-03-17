@@ -34,6 +34,8 @@
 #include "examples/imgui_impl_opengl3.cpp"
 #include "examples/imgui_impl_glfw.cpp"
 
+#include "simpleini/SimpleIni.h"
+
 #include "camera.cpp"
 #include "shader.cpp"
 #include "mesh.cpp"
