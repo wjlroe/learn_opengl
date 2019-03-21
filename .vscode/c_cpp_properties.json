@@ -20,7 +20,7 @@
         "C:\\dev\\assimp-4.1.0\\include"
       ],
       "forcedInclude": [
-        "common.h"
+        "src/common.h"
       ],
       "browse": {
         "path": [

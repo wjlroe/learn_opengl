@@ -41,7 +41,7 @@ pushd %build_dir%
 IF NOT EXIST glfw3.dll copy %GLFW_LIB_PATH%\glfw3.dll .
 REM SET CL=/DGEN_CONVERT_ELEMENTS_FROM_VERTICES#1
 cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc %build_flags:"=% ..\src\main.cpp -I ..\include^
- -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui^
+ -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui -I ..\include\stb -I ..\include\simpleini^
  /link %GLFW_LIB_PATH%\glfw3.lib %GLFW_LIB_PATH%\glfw3dll.lib opengl32.lib^
  glu32.lib %ASSIMP_LIB_PATH%\assimp-vc140-mt.lib /SUBSYSTEM:CONSOLE
 IF %ERRORLEVEL% NEQ 0 SET /A errno=%ERRORLEVEL%
