@@ -486,6 +486,10 @@ main()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+  glfwWindowHintString(GLFW_X11_CLASS_NAME, "Game");
+  glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "LearnOpenGL");
+
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
