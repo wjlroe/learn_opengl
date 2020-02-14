@@ -412,7 +412,7 @@ WindowRefreshCallback(GLFWwindow* Window)
 void
 ErrorCallback(int Error, const char* Description)
 {
-  std::cout << Description << std::endl;
+  std::cerr << Description << std::endl;
 }
 
 void
@@ -459,7 +459,8 @@ LoadTexture(unsigned int TextureUnit,
       GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   } else {
-    std::cout << "Failed to load texture" << std::endl;
+    std::cout << "Failed to load texture from TextureName: " << TextureName
+              << std::endl;
   }
   stbi_image_free(Data);
 }

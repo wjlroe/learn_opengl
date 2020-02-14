@@ -42,7 +42,7 @@ struct Shader
     glGetShaderiv(Vertex, GL_COMPILE_STATUS, &Success);
     if (!Success) {
       glGetShaderInfoLog(Vertex, 512, NULL, InfoLog);
-      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+      std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
                 << "SHADER SOURCE:\n"
                 << vShaderCode << "\nERROR:\n"
                 << InfoLog << std::endl;
@@ -55,7 +55,7 @@ struct Shader
     glGetShaderiv(Fragment, GL_COMPILE_STATUS, &Success);
     if (!Success) {
       glGetShaderInfoLog(Fragment, 512, NULL, InfoLog);
-      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
+      std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
                 << "SHADER SOURCE:\n"
                 << fShaderCode << "\nERROR:\n"
                 << InfoLog << std::endl;
@@ -69,7 +69,7 @@ struct Shader
     glGetProgramiv(ID, GL_LINK_STATUS, &Success);
     if (!Success) {
       glGetProgramInfoLog(ID, 512, NULL, InfoLog);
-      std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
+      std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
                 << InfoLog << std::endl;
     }
 
