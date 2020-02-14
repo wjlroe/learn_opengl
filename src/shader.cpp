@@ -10,22 +10,35 @@ struct Shader
     std::ifstream fShaderFile;
 
     vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try {
       vShaderFile.open(VertexPath);
-      fShaderFile.open(FragmentPath);
-      std::stringstream vShaderStream, fShaderStream;
+      std::stringstream vShaderStream;
 
       vShaderStream << vShaderFile.rdbuf();
-      fShaderStream << fShaderFile.rdbuf();
 
       vShaderFile.close();
-      fShaderFile.close();
 
       VertexCode = vShaderStream.str();
+    } catch (const std::ifstream::failure& e) {
+      std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ : " << VertexPath
+                << std::endl;
+      throw;
+    }
+
+    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+      fShaderFile.open(FragmentPath);
+      std::stringstream fShaderStream;
+
+      fShaderStream << fShaderFile.rdbuf();
+
+      fShaderFile.close();
+
       FragmentCode = fShaderStream.str();
     } catch (const std::ifstream::failure& e) {
-      std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+      std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << FragmentPath
+                << std::endl;
+      throw;
     }
 
     const char* vShaderCode = VertexCode.c_str();

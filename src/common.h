@@ -3,6 +3,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <fstream>
+#include <filesystem>
 #include <glad/glad.h>
 #include <iostream>
 #include <math.h>

@@ -415,7 +415,7 @@ ErrorCallback(int Error, const char* Description)
   std::cerr << Description << std::endl;
 }
 
-void
+int
 LoadTexture(unsigned int TextureUnit,
             unsigned int* Texture,
             const char* TextureName)
@@ -461,8 +461,10 @@ LoadTexture(unsigned int TextureUnit,
   } else {
     std::cout << "Failed to load texture from TextureName: " << TextureName
               << std::endl;
+    return -1;
   }
   stbi_image_free(Data);
+  return 0;
 }
 
 void
@@ -473,9 +475,37 @@ CleanupDrawResources(DrawResources Resources)
   glDeleteBuffers(1, &Resources.EBO);
 }
 
+static char BUILD_DIR[MAX_PATH];
+
+std::string
+BuildRelativePath(const char* Path)
+{
+  std::filesystem::path Result = BUILD_DIR;
+  Result.append(Path);
+
+  return Result.string();
+}
+
 int
 main()
 {
+#ifdef WIN32
+  {
+    // Find the dir of this exe, to resolve references relative to build dir
+    char result[MAX_PATH];
+    int bytes = GetModuleFileName(NULL, result, MAX_PATH);
+    if (bytes == 0) {
+      std::cout << "Could not work out directory of running executable with "
+                   "GetModuleFileName!"
+                << std::endl;
+      return -1;
+    }
+    char dirname[MAX_PATH];
+    _splitpath(result, NULL, BUILD_DIR, NULL, NULL);
+    std::cout << "ok, build dir is: " << BUILD_DIR << std::endl;
+  }
+#endif
+
 #ifdef GEN_CONVERT_ELEMENTS_FROM_VERTICES
   genCubeIndices();
 #endif
@@ -553,19 +583,31 @@ main()
               << std::endl;
   }
 
-  Shader DepthTestingShader("../src/shaders/depth_testing.vert",
-                            "../src/shaders/depth_testing.frag");
+  Shader DepthTestingShader(
+    BuildRelativePath("../src/shaders/depth_testing.vert").c_str(),
+    BuildRelativePath("../src/shaders/depth_testing.frag").c_str());
   DrawResources CubeResources =
     SetupCubeResources(24, CubeVertices, 36, CubeIndices);
-  LoadTexture(GL_TEXTURE0, &CubeResources.texture1, "../assets/marble.jpg");
+  if (LoadTexture(GL_TEXTURE0,
+                  &CubeResources.texture1,
+                  BuildRelativePath("../assets/marble.jpg").c_str()) != 0) {
+    return -1;
+  }
   DrawResources PlaneResources =
     SetupCubeResources(20, PlaneVertices, 6, PlaneIndices);
-  LoadTexture(GL_TEXTURE0, &PlaneResources.texture1, "../assets/metal.jpg");
+  if (LoadTexture(GL_TEXTURE0,
+                  &PlaneResources.texture1,
+                  BuildRelativePath("../assets/metal.jpg").c_str()) != 0) {
+    return -1;
+  }
   DrawResources QuadResources =
     SetupCubeResources(20, QuadVertices, 6, QuadIndices);
-  LoadTexture(GL_TEXTURE0,
-              &QuadResources.texture1,
-              "../assets/blending_transparent_window.png");
+  if (LoadTexture(GL_TEXTURE0,
+                  &QuadResources.texture1,
+                  BuildRelativePath("../assets/blending_transparent_window.png")
+                    .c_str()) != 0) {
+    return -1;
+  }
 
   GlobalGameState.Window = Window;
   GlobalGameState.WindowState = WindowState;
