@@ -1,4 +1,6 @@
 @echo off
+set VSCMD_DEBUG=4
+setlocal
 
 set start=%time%
 set BUILD_PATH=%~dp0
@@ -8,11 +10,30 @@ echo build32 is %build32%
 
 SET /A errno=0
 
-IF %build32% == true (
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
-) ELSE (
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+set vclocations="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"
+set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall_debug.bat"
+
+(for %%f in (%vclocations%) do (
+    echo %%f
+    set vc_location="%%f"
+    if exist "%%f" (GOTO :foundLocation)
+))
+
+:foundLocation
+
+if not exist "%vc_location%" (
+    echo Can't find Visual Studio location
+    exit /b 1
 )
+
+IF %build32% == true (
+  call "%vc_location%" x86
+) ELSE (
+  echo Building 64bit
+  call "%vc_location%" x64
+)
+
+echo now time for glfw stuff
 
 IF %build32% == true (
   set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN32\include"
