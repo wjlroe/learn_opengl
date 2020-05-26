@@ -9,9 +9,9 @@ echo build32 is %build32%
 
 SET /A errno=0
 
-set vclocations="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
-set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
+set vclocations="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
 set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build"
+set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
 
 (for %%f in (%vclocations%) do (
     set vc_location="%%f"
