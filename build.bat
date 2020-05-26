@@ -1,5 +1,4 @@
 @echo off
-set VSCMD_DEBUG=4
 setlocal
 
 set start=%time%
@@ -10,12 +9,11 @@ echo build32 is %build32%
 
 SET /A errno=0
 
-set vclocations="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"
-set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat"
-set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall_debug.bat"
+set vclocations="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
+set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
+set vclocations=%vclocations%;"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build"
 
 (for %%f in (%vclocations%) do (
-    echo %%f
     set vc_location="%%f"
     if exist "%%f" (GOTO :foundLocation)
 ))
@@ -27,25 +25,48 @@ if not exist "%vc_location%" (
     exit /b 1
 )
 
+echo VS Location: %vc_location%
+
+pushd "%vc_location%"
 IF %build32% == true (
-  call "%vc_location%" x86
+  echo Building 32bit
+  call vcvarsall x86
 ) ELSE (
   echo Building 64bit
-  call "%vc_location%" x64
+  call vcvarsall x64
 )
-
-echo now time for glfw stuff
+popd
 
 IF %build32% == true (
-  set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN32\include"
-  set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN32\lib-vc2015"
+  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN32\include"
+  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN32\lib-vc2015"
 ) ELSE (
-  set GLFW_INCLUDE_PATH="C:\glfw-3.2.1.bin.WIN64\include"
-  set GLFW_LIB_PATH="C:\glfw-3.2.1.bin.WIN64\lib-vc2015"
+  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN64\include"
+  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN64\lib-vc2015"
 )
 
-set ASSIMP_INCLUDE_PATH="C:\dev\assimp-4.1.0\include"
-set ASSIMP_LIB_PATH="C:\dev\assimp-4.1.0\lib\Release"
+if not exist "%GLFW_INCLUDE_PATH%" (
+  echo Can't find GLFW include files in %GLFW_INCLUDE_PATH%
+  exit /b 1
+)
+
+if not exist "%GLFW_LIB_PATH%" (
+  echo Can't find GLFW lib files in %GLFW_LIB_PATH%
+  exit /b 1
+)
+
+set ASSIMP_INCLUDE_PATH="%USERPROFILE%\Downloads\assimp-4.1.0\include"
+set ASSIMP_LIB_PATH="%USERPROFILE%\Downloads\assimp-4.1.0\lib\Release"
+
+if not exist "%ASSIMP_INCLUDE_PATH%" (
+  echo Can't find assimp include path %ASSIMP_INCLUDE_PATH%
+  exit /b 1
+)
+
+if not exist "%ASSIMP_LIB_PATH%" (
+  echo Can't find assimp lib path %ASSIMP_LIB_PATH%
+  exit /b 1
+)
 
 set build_message=BUILD_PATH is %BUILD_PATH%
 echo %build_message%
