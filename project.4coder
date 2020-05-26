@@ -17,6 +17,7 @@ blacklist_patterns = {
 };
 load_paths_only = {
  {"src"},
+ {".", .recursive = false},
 };
 load_paths = {
  { load_paths_only, .os = "win"  },
