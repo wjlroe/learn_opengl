@@ -609,6 +609,14 @@ main()
     return -1;
   }
 
+  {
+    // try basic quad shaders
+    Shader QuadShader(
+      BuildRelativePath("../src/shaders/quad_vert.glsl").c_str(),
+      BuildRelativePath("../src/shaders/quad_frag.glsl").c_str());
+    std::cout << "Done compiling quad shaders" << std::endl;
+  }
+
   GlobalGameState.Window = Window;
   GlobalGameState.WindowState = WindowState;
   GlobalGameState.FirstMouseMove = true;
