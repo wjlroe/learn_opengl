@@ -197,6 +197,32 @@ struct GameState
   bool OutlineCubes;
   bool ShowEditor;
 
+  void ProcessJoystick(int JoystickNum) {
+    // const char* JoystickName = glfwGetJoystickName(JoystickNum);
+    // printf("Joystick(%d): %s\n", JoystickNum, JoystickName);
+    if (glfwJoystickIsGamepad(JoystickNum)) {
+      // Use as gamepad
+      const char *GamepadName = glfwGetGamepadName(JoystickNum);
+    }
+    int Count;
+    const float *Axes = glfwGetJoystickAxes(JoystickNum, &Count);
+    for (int i = 0; i < Count; i++) {
+      if (Axes[i] > 0.01) {
+        printf("Axes[%d]=%f\n", i, Axes[i]);
+      }
+    }
+  }
+
+  void ProcessJoysticks(float DeltaTime) {
+    for (int JoystickNum = GLFW_JOYSTICK_1; JoystickNum < GLFW_JOYSTICK_16 + 1;
+         JoystickNum++) {
+      // TODO: remove disconnected joysticks/controllers
+      if (glfwJoystickPresent(JoystickNum)) {
+        ProcessJoystick(JoystickNum);
+      }
+    }
+  }
+  
   void ProcessInput(float DeltaTime)
   {
     if (!ShowEditor) {
@@ -229,6 +255,8 @@ struct GameState
       Camera.ProcessMouseMovement(XOffset, YOffset);
       Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
     }
+    
+    ProcessJoysticks(DeltaTime);
   }
 
   void ProcessKeyInput(int Key, int Scancode, int Action, int Mods, int LastKey)
@@ -570,6 +598,9 @@ main()
   if (CAPTURE_MOUSE) {
     glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
+  
+  const char* mappings = LoadFileContents("gamecontrollerdb.txt");
+  glfwUpdateGamepadMappings(mappings);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -37,6 +37,7 @@
 
 #include "simpleini/SimpleIni.h"
 
+#include "utils.cpp"
 #include "camera.cpp"
 #include "shader.cpp"
 #include "mesh.cpp"
