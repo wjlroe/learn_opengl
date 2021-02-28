@@ -179,6 +179,20 @@ struct WindowState
   bool Maximized;
 };
 
+#define NUM_CONTROLLERS 24
+
+enum ControllerType {
+  ControllerGamepad,
+  ControllerJoystick,
+};
+
+struct ControllerState {
+  int JoystickIndex; // GLFW joystick index
+  bool Present;
+  const char* Name;
+  ControllerType Type;
+};
+
 struct GameState
 {
   GLFWwindow* Window;
@@ -196,19 +210,27 @@ struct GameState
   Shader* DepthTestingShader;
   bool OutlineCubes;
   bool ShowEditor;
+  ControllerState Controllers[NUM_CONTROLLERS];
 
   void ProcessJoystick(int JoystickNum) {
-    // const char* JoystickName = glfwGetJoystickName(JoystickNum);
+    ControllerState* Controller = &Controllers[JoystickNum];
+    Controller->Present = true;
     // printf("Joystick(%d): %s\n", JoystickNum, JoystickName);
     if (glfwJoystickIsGamepad(JoystickNum)) {
       // Use as gamepad
       const char *GamepadName = glfwGetGamepadName(JoystickNum);
+      Controller->Name = GamepadName;
+      Controller->Type = ControllerGamepad;
+    } else {
+      const char* JoystickName = glfwGetJoystickName(JoystickNum);
+      Controller->Name = JoystickName;
+      Controller->Type = ControllerJoystick;
     }
     int Count;
     const float *Axes = glfwGetJoystickAxes(JoystickNum, &Count);
     for (int i = 0; i < Count; i++) {
       if (Axes[i] > 0.01) {
-        printf("Axes[%d]=%f\n", i, Axes[i]);
+        // printf("Axes[%d]=%f\n", i, Axes[i]);
       }
     }
   }
@@ -369,14 +391,23 @@ struct GameState
 
         if (!ImGui::Begin("Editor", &editor_open)) {
         }
-        char buf[1024];
-        float f = 0.5f;
-        ImGui::Text("Hello, world %d", 123);
-        if (ImGui::Button("Save")) {
-          // do something
+        ImGui::BeginChild("Scrolling");
+        for (int ControllerNum = 0; ControllerNum < NUM_CONTROLLERS; ControllerNum++) {
+          ControllerState Controller = Controllers[ControllerNum];
+          if (Controller.Present) {
+            char ThisControllerType[512] = "UnknownControllerType";
+            switch (Controller.Type) {
+              case ControllerGamepad: {
+                strcpy(ThisControllerType, "Gamepad");
+              } break;
+              case ControllerJoystick: {
+                strcpy(ThisControllerType, "Joystick");
+              } break;
+            }
+            ImGui::Text("%04d [%s]: %s", ControllerNum, ThisControllerType, Controller.Name);
+          }
         }
-        ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+        ImGui::EndChild();
         ImGui::End();
 
         ImGui::Render();
@@ -664,6 +695,9 @@ main()
   GlobalGameState.QuadResources = QuadResources;
   GlobalGameState.DepthTestingShader = &DepthTestingShader;
   GlobalGameState.ShowEditor = false;
+  for (int ControllerIndex = 0; ControllerIndex < NUM_CONTROLLERS; ControllerIndex++) {
+    GlobalGameState.Controllers[ControllerIndex] = {};
+  }
   glfwGetFramebufferSize(
     Window, &GlobalGameState.Width, &GlobalGameState.Height);
 
