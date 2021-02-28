@@ -29,6 +29,7 @@ load_paths = {
 };
 
 build_win32 = "build.bat";
+build_and_run_win32_cmd = "build_and_run.bat";
 build_unix = "build.sh";
 
 command_list = {
@@ -36,7 +37,13 @@ command_list = {
    .out = "*compilation*", .footer_panel = true, .save_dirty_files = true,
    .cmd = { {build_win32, .os ="win"  },
             {build_unix , .os ="linux"}, 
-            {build_unix , .os ="mac"  }, }, }, 
+            {build_unix , .os ="mac"  }, }, },   
+ { .name = "build and run",
+   .out = "*compilation*", .footer_panel = true, .save_dirty_files = true,
+   .cmd = { {build_and_run_win32_cmd, .os ="win"  },
+            {build_unix , .os ="linux"}, 
+            {build_unix , .os ="mac"  }, }, },   
 };
 
-fkey_command[5] = "build";
+fkey_command[4] = "build";
+fkey_command[5] = "build and run";
