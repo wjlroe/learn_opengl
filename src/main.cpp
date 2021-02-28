@@ -182,13 +182,13 @@ struct WindowState
 #define NUM_CONTROLLERS 24
 
 enum ControllerType {
+  DisconnectedController,
   ControllerGamepad,
   ControllerJoystick,
 };
 
 struct ControllerState {
   int JoystickIndex; // GLFW joystick index
-  bool Present;
   const char* Name;
   ControllerType Type;
 };
@@ -214,10 +214,7 @@ struct GameState
 
   void ProcessJoystick(int JoystickNum) {
     ControllerState* Controller = &Controllers[JoystickNum];
-    Controller->Present = true;
-    // printf("Joystick(%d): %s\n", JoystickNum, JoystickName);
     if (glfwJoystickIsGamepad(JoystickNum)) {
-      // Use as gamepad
       Controller->Name = glfwGetGamepadName(JoystickNum);
       Controller->Type = ControllerGamepad;
     } else {
@@ -392,7 +389,7 @@ struct GameState
         ImGui::BeginChild("Scrolling");
         for (int ControllerNum = 0; ControllerNum < NUM_CONTROLLERS; ControllerNum++) {
           ControllerState Controller = Controllers[ControllerNum];
-          if (Controller.Present) {
+          if (Controller.Type) {
             char ThisControllerType[512] = "UnknownControllerType";
             switch (Controller.Type) {
               case ControllerGamepad: {
