@@ -188,7 +188,6 @@ enum ControllerType {
 };
 
 struct ControllerState {
-  int JoystickIndex; // GLFW joystick index
   const char* Name;
   ControllerType Type;
 };
