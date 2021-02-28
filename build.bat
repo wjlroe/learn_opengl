@@ -38,11 +38,11 @@ IF %build32% == true (
 popd
 
 IF %build32% == true (
-  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN32\include"
-  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN32\lib-vc2015"
+  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN32\include"
+  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN32\lib-vc2015"
 ) ELSE (
-  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN64\include"
-  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.2.bin.WIN64\lib-vc2015"
+  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN64\include"
+  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN64\lib-vc2019"
 )
 
 if not exist "%GLFW_INCLUDE_PATH%" (
