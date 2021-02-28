@@ -579,6 +579,9 @@ main()
     return -1;
   }
 
+  const char* glfwVersion = glfwGetVersionString();
+  std::cout << "GLFW version: " << glfwVersion << std::endl;
+
   const GLubyte* renderer = glGetString(GL_RENDERER);
   const GLubyte* version = glGetString(GL_VERSION);
   std::cout << "Renderer: " << renderer << std::endl;
