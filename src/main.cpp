@@ -218,12 +218,10 @@ struct GameState
     // printf("Joystick(%d): %s\n", JoystickNum, JoystickName);
     if (glfwJoystickIsGamepad(JoystickNum)) {
       // Use as gamepad
-      const char *GamepadName = glfwGetGamepadName(JoystickNum);
-      Controller->Name = GamepadName;
+      Controller->Name = glfwGetGamepadName(JoystickNum);
       Controller->Type = ControllerGamepad;
     } else {
-      const char* JoystickName = glfwGetJoystickName(JoystickNum);
-      Controller->Name = JoystickName;
+      Controller->Name = glfwGetJoystickName(JoystickNum);
       Controller->Type = ControllerJoystick;
     }
     int Count;
