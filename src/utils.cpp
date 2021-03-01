@@ -1,4 +1,4 @@
-const char* LoadFileContents(const char* Path)
+char* LoadFileContents(const char* Path)
 {
     std::string Contents;
     std::ifstream file;
@@ -17,5 +17,5 @@ const char* LoadFileContents(const char* Path)
             << std::endl;
         throw;
     }
-    return Contents.c_str();
+    return strdup(Contents.c_str());
 }

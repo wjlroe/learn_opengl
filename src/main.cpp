@@ -655,8 +655,11 @@ main()
     glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
 
-  const char* mappings = LoadFileContents("gamecontrollerdb.txt");
+  std::cout << "Loading game controller mapping database ";
+  char* mappings = LoadFileContents("gamecontrollerdb.txt");
   glfwUpdateGamepadMappings(mappings);
+  std::cout << "... DONE" << std::endl;
+  free(mappings);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
