@@ -377,13 +377,12 @@ struct GameState
     }
 
     if (ShowEditor) {
-      static bool editor_open = false;
       {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (!ImGui::Begin("Editor", &editor_open)) {
+        if (!ImGui::Begin("Editor", &ShowEditor)) {
         }
         ImGui::BeginChild("Scrolling");
         for (int ControllerNum = 0; ControllerNum < NUM_CONTROLLERS; ControllerNum++) {
