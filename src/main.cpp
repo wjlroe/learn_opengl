@@ -190,6 +190,7 @@ enum ControllerType {
 struct ControllerState {
   const char* Name;
   ControllerType Type;
+  int NumHats;
   unsigned char Hats[32];
 };
 
@@ -229,8 +230,8 @@ struct GameState
         }
       }
 
-      const unsigned char* Hats = glfwGetJoystickHats(JoystickNum, &Count);
-      for (int HatIdx = 0; HatIdx < Count; HatIdx++) {
+      const unsigned char* Hats = glfwGetJoystickHats(JoystickNum, &Controller->NumHats);
+      for (int HatIdx = 0; HatIdx < Controller->NumHats; HatIdx++) {
         Controller->Hats[HatIdx] = Hats[HatIdx];
       }
     }
@@ -393,6 +394,7 @@ struct GameState
         }
         ImGui::BeginChild("Scrolling");
         for (int ControllerNum = 0; ControllerNum < NUM_CONTROLLERS; ControllerNum++) {
+          ImGui::PushID(ControllerNum);
           ControllerState Controller = Controllers[ControllerNum];
           if (Controller.Type) {
             char ThisControllerType[512] = "UnknownControllerType";
@@ -409,10 +411,23 @@ struct GameState
             ImGui::NextColumn();
             if (Controller.Type == ControllerJoystick) {
               if (ImGui::Button("Hats")) {
+                if (ImGui::Begin("Hats State")) {
+                }
+                for (int HatIdx = 0; HatIdx < Controller.NumHats; HatIdx++) {
+                  ImGui::PushID(HatIdx);
+                  unsigned char Hat = Controller.Hats[HatIdx];
+                  ImGui::Value("hatidx", HatIdx);
+                  ImGui::Value("Centered", (bool)(Hat & GLFW_HAT_CENTERED));
+                  ImGui::Value("Right", (bool)(Hat & GLFW_HAT_RIGHT));
+                  ImGui::PopID();
+                }
+                ImGui::End();
               }
             }
             ImGui::NextColumn();
+            //ImGui::Separator();
           }
+          ImGui::PopID();
         }
         ImGui::EndChild();
         ImGui::End();
