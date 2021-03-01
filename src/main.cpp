@@ -250,6 +250,7 @@ struct GameState
   void ProcessInput(float DeltaTime)
   {
     if (!ShowEditor) {
+      // TODO: move keyboard stuff to ProcessKeyInput
       if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS) {
         Camera.ProcessKeyboard(FORWARD, DeltaTime);
       }
@@ -475,6 +476,7 @@ KeyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
 {
   static int LastKey = 0;
 
+  // TODO: translate to own types, hereon in, to GLFW types to be used
   GlobalGameState.ProcessKeyInput(Key, Scancode, Action, Mods, LastKey);
 
   if ((Action == GLFW_RELEASE) || (Action == GLFW_REPEAT)) {
