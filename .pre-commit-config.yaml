@@ -1,4 +1,4 @@
-exclude: '^(include|assets|data)/'
+exclude: '^(include|assets|data|\.vscode)/'
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
