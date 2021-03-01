@@ -6,11 +6,11 @@ const char* LoadFileContents(const char* Path)
     try {
         file.open(Path);
         std::stringstream fileStream;
-        
+
         fileStream << file.rdbuf();
-        
+
         file.close();
-        
+
         Contents = fileStream.str();
     } catch (const std::ifstream::failure& e) {
         std::cerr << "ERROR::FILE_NOT_SUCCESSFULLY_READ : " << Path
