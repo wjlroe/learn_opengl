@@ -180,6 +180,8 @@ struct WindowState
 };
 
 #define NUM_CONTROLLERS 24
+#define MAX_HATS 32
+#define MAX_AXISES 32
 
 enum ControllerType {
   DisconnectedController,
@@ -191,7 +193,9 @@ struct ControllerState {
   const char* Name;
   ControllerType Type;
   int NumHats;
-  unsigned char Hats[32];
+  unsigned char Hats[MAX_HATS];
+  int NumAxises;
+  float Axises[MAX_AXISES];
 };
 
 struct GameState
@@ -222,12 +226,9 @@ struct GameState
       Controller->Name = glfwGetJoystickName(JoystickNum);
       Controller->Type = ControllerJoystick;
 
-      int Count;
-      const float *Axes = glfwGetJoystickAxes(JoystickNum, &Count);
-      for (int i = 0; i < Count; i++) {
-        if (Axes[i] > 0.01) {
-          // printf("Axes[%d]=%f\n", i, Axes[i]);
-        }
+      const float *Axes = glfwGetJoystickAxes(JoystickNum, &Controller->NumAxises);
+      for (int i = 0; i < Controller->NumAxises; i++) {
+        Controller->Axises[i] = Axes[i];
       }
 
       const unsigned char* Hats = glfwGetJoystickHats(JoystickNum, &Controller->NumHats);
@@ -391,6 +392,9 @@ struct GameState
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        static bool ShowHats[NUM_CONTROLLERS] = {};
+        static bool ShowAxises[NUM_CONTROLLERS] = {};
+
         if (!ImGui::Begin("Editor", &ShowEditor)) {
         }
         ImGui::BeginChild("Scrolling");
@@ -407,23 +411,54 @@ struct GameState
                 strcpy(ThisControllerType, "Joystick");
               } break;
             }
-            ImGui::Columns(2);
+            ImGui::Columns(3);
             ImGui::Text("%04d [%s]: %s", ControllerNum, ThisControllerType, Controller.Name);
             ImGui::NextColumn();
             if (Controller.Type == ControllerJoystick) {
-              if (ImGui::Button("Hats")) {
-                if (ImGui::Begin("Hats State")) {
+              bool ThisShowHats = ImGui::Button("Hats");
+              if (ThisShowHats) {
+                if (!ShowHats[ControllerNum]) {
+                  ShowHats[ControllerNum] = true;
+                }
+              }
+              ThisShowHats = ThisShowHats || ShowHats[ControllerNum];
+              if (ThisShowHats) {
+                if (!ImGui::Begin("Hats State"), &ShowHats[ControllerNum]) {
                 }
                 for (int HatIdx = 0; HatIdx < Controller.NumHats; HatIdx++) {
                   ImGui::PushID(HatIdx);
                   unsigned char Hat = Controller.Hats[HatIdx];
                   ImGui::Value("hatidx", HatIdx);
-                  ImGui::Value("Centered", (bool)(Hat & GLFW_HAT_CENTERED));
+                  ImGui::Value("Centered", Hat == GLFW_HAT_CENTERED);
+                  ImGui::Value("Up", (bool)(Hat & GLFW_HAT_UP));
                   ImGui::Value("Right", (bool)(Hat & GLFW_HAT_RIGHT));
+                  ImGui::Value("Down", (bool)(Hat & GLFW_HAT_DOWN));
+                  ImGui::Value("Left", (bool)(Hat & GLFW_HAT_LEFT));
                   ImGui::PopID();
                 }
                 ImGui::End();
               }
+              ImGui::NextColumn();
+              bool ThisShowAxises = ImGui::Button("Axises");
+              if (ThisShowAxises) {
+                if (!ShowAxises[ControllerNum]) {
+                  ShowAxises[ControllerNum] = true;
+                }
+              }
+              ThisShowAxises = ThisShowAxises || ShowAxises[ControllerNum];
+              if (ThisShowAxises) {
+                if (!ImGui::Begin("Axises State"), &ShowAxises[ControllerNum]) {
+                }
+                for (int AxisIdx = 0; AxisIdx < Controller.NumAxises; AxisIdx++) {
+                  ImGui::PushID(AxisIdx);
+                  ImGui::Value("AxisIdx", AxisIdx);
+                  ImGui::Value("value", Controller.Axises[AxisIdx]);
+                  ImGui::PopID();
+                }
+                ImGui::End();
+              }
+            } else {
+              ImGui::NextColumn(); // between hats and axis buttons otherwise
             }
             ImGui::NextColumn();
             //ImGui::Separator();
