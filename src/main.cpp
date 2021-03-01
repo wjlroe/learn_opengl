@@ -190,6 +190,7 @@ enum ControllerType {
 struct ControllerState {
   const char* Name;
   ControllerType Type;
+  unsigned char Hats[32];
 };
 
 struct GameState
@@ -219,12 +220,18 @@ struct GameState
     } else {
       Controller->Name = glfwGetJoystickName(JoystickNum);
       Controller->Type = ControllerJoystick;
-    }
-    int Count;
-    const float *Axes = glfwGetJoystickAxes(JoystickNum, &Count);
-    for (int i = 0; i < Count; i++) {
-      if (Axes[i] > 0.01) {
-        // printf("Axes[%d]=%f\n", i, Axes[i]);
+
+      int Count;
+      const float *Axes = glfwGetJoystickAxes(JoystickNum, &Count);
+      for (int i = 0; i < Count; i++) {
+        if (Axes[i] > 0.01) {
+          // printf("Axes[%d]=%f\n", i, Axes[i]);
+        }
+      }
+
+      const unsigned char* Hats = glfwGetJoystickHats(JoystickNum, &Count);
+      for (int HatIdx = 0; HatIdx < Count; HatIdx++) {
+        Controller->Hats[HatIdx] = Hats[HatIdx];
       }
     }
   }
@@ -238,7 +245,7 @@ struct GameState
       }
     }
   }
-  
+
   void ProcessInput(float DeltaTime)
   {
     if (!ShowEditor) {
@@ -271,7 +278,7 @@ struct GameState
       Camera.ProcessMouseMovement(XOffset, YOffset);
       Camera.ProcessMouseScroll((float)MouseScrollState.YOffset);
     }
-    
+
     ProcessJoysticks(DeltaTime);
   }
 
@@ -397,7 +404,14 @@ struct GameState
                 strcpy(ThisControllerType, "Joystick");
               } break;
             }
+            ImGui::Columns(2);
             ImGui::Text("%04d [%s]: %s", ControllerNum, ThisControllerType, Controller.Name);
+            ImGui::NextColumn();
+            if (Controller.Type == ControllerJoystick) {
+              if (ImGui::Button("Hats")) {
+              }
+            }
+            ImGui::NextColumn();
           }
         }
         ImGui::EndChild();
@@ -625,7 +639,7 @@ main()
   if (CAPTURE_MOUSE) {
     glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
-  
+
   const char* mappings = LoadFileContents("gamecontrollerdb.txt");
   glfwUpdateGamepadMappings(mappings);
 
