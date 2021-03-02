@@ -179,7 +179,7 @@ struct WindowState
   bool Maximized;
 };
 
-#define NUM_CONTROLLERS 24
+#define NUM_CONTROLLERS 32
 #define MAX_HATS 32
 #define MAX_AXISES 32
 
