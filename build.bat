@@ -5,7 +5,7 @@ set start=%time%
 set BUILD_PATH=%~dp0
 
 IF NOT DEFINED build32 (SET build32=false)
-echo build32 is %build32%
+REM echo build32 is %build32%
 
 SET /A errno=0
 
@@ -25,14 +25,14 @@ if not exist "%vc_location%" (
     exit /b 1
 )
 
-echo VS Location: %vc_location%
+REM echo VS Location: %vc_location%
 
 pushd "%vc_location%"
 IF %build32% == true (
-  echo Building 32bit
+  REM echo Building 32bit
   call vcvarsall x86
 ) ELSE (
-  echo Building 64bit
+  REM echo Building 64bit
   call vcvarsall x64
 )
 popd
@@ -69,7 +69,7 @@ if not exist "%ASSIMP_LIB_PATH%" (
 )
 
 set build_message=BUILD_PATH is %BUILD_PATH%
-echo %build_message%
+REM echo %build_message%
 cd %BUILD_PATH%
 
 IF %build32% == true (
@@ -82,7 +82,7 @@ IF %build32% == true (
 IF NOT EXIST %build_dir% mkdir %build_dir%
 pushd %build_dir%
 IF NOT EXIST glfw3.dll copy %GLFW_LIB_PATH%\glfw3.dll .
-copy ..\data\gamecontrollerdb.txt .
+IF NOT EXIST gamecontrollerdb.txt copy ..\data\gamecontrollerdb.txt .
 REM SET CL=/DGEN_CONVERT_ELEMENTS_FROM_VERTICES#1
 cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc -diagnostics:column %build_flags:"=% ..\src\main.cpp -I ..\include^
  -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui -I ..\include\stb -I ..\include\simpleini^
