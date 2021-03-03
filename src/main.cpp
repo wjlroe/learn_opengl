@@ -177,6 +177,7 @@ struct WindowState
   int WindowWidth;
   int WindowHeight;
   bool Maximized;
+  bool pboSupported;
 };
 
 #define NUM_CONTROLLERS 32
@@ -703,6 +704,12 @@ main()
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     std::cout << "Failed to initialize GLAD" << std::endl;
     return -1;
+  }
+
+  if (glfwExtensionSupported("GL_ARB_pixel_buffer_object")) {
+    WindowState.pboSupported = true;
+  } else {
+    WindowState.pboSupported = false;
   }
 
   const char* glfwVersion = glfwGetVersionString();
