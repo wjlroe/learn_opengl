@@ -76,7 +76,7 @@ struct DrawResources
 };
 
 DrawResources
-SetupCubeResources(unsigned int NumVertices,
+InitDrawResources(unsigned int NumVertices,
                    const float Vertices[],
                    unsigned int NumIndices,
                    const unsigned int Indices[])
@@ -750,21 +750,21 @@ main()
     BuildRelativePath("../src/shaders/depth_testing.vert").c_str(),
     BuildRelativePath("../src/shaders/depth_testing.frag").c_str());
   DrawResources CubeResources =
-    SetupCubeResources(24, CubeVertices, 36, CubeIndices);
+    InitDrawResources(24, CubeVertices, 36, CubeIndices);
   if (LoadTexture(GL_TEXTURE0,
                   &CubeResources.texture1,
                   BuildRelativePath("../assets/marble.jpg").c_str()) != 0) {
     return -1;
   }
   DrawResources PlaneResources =
-    SetupCubeResources(20, PlaneVertices, 6, PlaneIndices);
+    InitDrawResources(20, PlaneVertices, 6, PlaneIndices);
   if (LoadTexture(GL_TEXTURE0,
                   &PlaneResources.texture1,
                   BuildRelativePath("../assets/metal.jpg").c_str()) != 0) {
     return -1;
   }
   DrawResources QuadResources =
-    SetupCubeResources(20, QuadVertices, 6, QuadIndices);
+    InitDrawResources(20, QuadVertices, 6, QuadIndices);
   if (LoadTexture(GL_TEXTURE0,
                   &QuadResources.texture1,
                   BuildRelativePath("../assets/blending_transparent_window.png")
