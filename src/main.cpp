@@ -214,7 +214,7 @@ struct GameState
   struct MouseScrollState MouseScrollState;
   DrawResources CubeResources;
   DrawResources PlaneResources;
-  DrawResources QuadResources;
+  DrawResources WindowResources;
   Shader* DepthTestingShader;
   bool OutlineCubes;
   bool ShowEditor;
@@ -389,7 +389,7 @@ struct GameState
       for (glm::vec3 WindowPosition : WindowPositions) {
         glm::mat4 ModelMatrix = glm::mat4(1.0f);
         ModelMatrix = glm::translate(ModelMatrix, WindowPosition);
-        DrawCube(QuadResources, DepthTestingShader, ModelMatrix);
+        DrawCube(WindowResources, DepthTestingShader, ModelMatrix);
       }
       glPopDebugGroup();
     }
@@ -763,10 +763,10 @@ main()
                   BuildRelativePath("../assets/metal.jpg").c_str()) != 0) {
     return -1;
   }
-  DrawResources QuadResources =
+  DrawResources WindowResources =
     InitDrawResources(20, QuadVertices, 6, QuadIndices);
   if (LoadTexture(GL_TEXTURE0,
-                  &QuadResources.texture1,
+                  &WindowResources.texture1,
                   BuildRelativePath("../assets/blending_transparent_window.png")
                     .c_str()) != 0) {
     return -1;
@@ -790,7 +790,7 @@ main()
   GlobalGameState.Camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
   GlobalGameState.CubeResources = CubeResources;
   GlobalGameState.PlaneResources = PlaneResources;
-  GlobalGameState.QuadResources = QuadResources;
+  GlobalGameState.WindowResources = WindowResources;
   GlobalGameState.DepthTestingShader = &DepthTestingShader;
   GlobalGameState.ShowEditor = false;
   for (int ControllerIndex = 0; ControllerIndex < NUM_CONTROLLERS; ControllerIndex++) {
