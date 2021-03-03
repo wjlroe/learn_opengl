@@ -137,7 +137,7 @@ InitDrawResources(unsigned int NumVertices,
 }
 
 void
-DrawCube(DrawResources Resources, Shader* CubeShader, glm::mat4 ModelMatrix)
+RenderDrawResources(DrawResources Resources, Shader* CubeShader, glm::mat4 ModelMatrix)
 {
   CubeShader->use();
   CubeShader->setMat4("model", ModelMatrix);
@@ -327,7 +327,7 @@ struct GameState
     for (glm::vec3 CubePosition : CubePositions) {
       glm::mat4 ModelMatrix = glm::mat4(1.0f);
       ModelMatrix = glm::translate(ModelMatrix, CubePosition);
-      DrawCube(Resources, Shader, ModelMatrix);
+      RenderDrawResources(Resources, Shader, ModelMatrix);
     }
   }
 
@@ -367,7 +367,7 @@ struct GameState
     {
       glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_FLOOR, -1, "Floor");
       glm::mat4 ModelMatrix = glm::mat4(1.0f);
-      DrawCube(PlaneResources, DepthTestingShader, ModelMatrix);
+      RenderDrawResources(PlaneResources, DepthTestingShader, ModelMatrix);
       glPopDebugGroup();
     }
 
@@ -389,7 +389,7 @@ struct GameState
       for (glm::vec3 WindowPosition : WindowPositions) {
         glm::mat4 ModelMatrix = glm::mat4(1.0f);
         ModelMatrix = glm::translate(ModelMatrix, WindowPosition);
-        DrawCube(WindowResources, DepthTestingShader, ModelMatrix);
+        RenderDrawResources(WindowResources, DepthTestingShader, ModelMatrix);
       }
       glPopDebugGroup();
     }
