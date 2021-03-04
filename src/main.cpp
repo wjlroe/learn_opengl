@@ -230,7 +230,7 @@ struct GameState
       Controller->Name = glfwGetJoystickName(JoystickNum);
       Controller->Type = ControllerJoystick;
 
-      const float *Axes = glfwGetJoystickAxes(JoystickNum, &Controller->NumAxises);
+      const float* Axes = glfwGetJoystickAxes(JoystickNum, &Controller->NumAxises);
       for (int i = 0; i < Controller->NumAxises; i++) {
         Controller->Axises[i] = Axes[i];
       }
