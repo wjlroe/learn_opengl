@@ -83,9 +83,6 @@ IF NOT EXIST %build_dir% mkdir %build_dir%
 pushd %build_dir%
 IF NOT EXIST glfw3.dll copy %GLFW_LIB_PATH%\glfw3.dll .
 copy ..\data\gamecontrollerdb.txt .
-rm main.exe
-rm main.obj
-rm main.ilk
 REM SET CL=/DGEN_CONVERT_ELEMENTS_FROM_VERTICES#1
 cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc -diagnostics:column %build_flags:"=% ..\src\main.cpp -I ..\include^
  -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui -I ..\include\stb -I ..\include\simpleini^
