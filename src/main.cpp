@@ -62,6 +62,7 @@ enum DEBUG_IDS
   DEBUG_CUBES,
   DEBUG_FLOOR,
   DEBUG_WINDOW,
+  DEBUG_CONTROLLER,
 };
 
 struct DrawResources
@@ -180,6 +181,72 @@ struct WindowState
   bool pboSupported;
 };
 
+struct ScribbleTexture
+{
+  GLubyte* Data;
+  int Width;
+  int Height;
+  int NumChannels;
+  GLenum PixelFormat;
+  DrawResources Resources;
+};
+
+ScribbleTexture
+InitScribbleTexture(int Width, int Height, int NumChannels, GLenum PixelFormat)
+{
+  ScribbleTexture Result = {};
+  Result.Data = new GLubyte[Width * Height * NumChannels];
+  memset(Result.Data, 0, Width * Height * NumChannels);
+  Result.Width = Width;
+  Result.Height = Height;
+  Result.NumChannels = NumChannels;
+  Result.PixelFormat = PixelFormat;
+  Result.Resources = InitDrawResources(20, QuadVertices, 6, QuadIndices);
+
+  glGenTextures(1, &Result.Resources.texture1);
+  glBindTexture(GL_TEXTURE_2D, Result.Resources.texture1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Result.Width, Result.Height, 0, Result.PixelFormat, GL_UNSIGNED_BYTE, (GLvoid*)Result.Data);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  int ColorSize = sizeof(int);
+  std::cout << "size of Color: " << ColorSize << std::endl;
+
+  return Result;
+}
+
+void PaintIntoScribble(ScribbleTexture* Texture)
+{
+  static int Color = 0xffffffff;
+
+  if (!Texture->Data) {
+    return;
+  }
+
+  int* ptr = (int*)Texture->Data;
+
+  for (int i = 0; i < Texture->Height; i++) {
+    for (int j = 0; j < Texture->Width; j++) {
+      *ptr = Color;
+      ++ptr;
+    }
+  }
+}
+
+void RenderScribble(ScribbleTexture* Texture, Shader* Shader, glm::mat4 ModelMatrix)
+{
+  // non-PBO way to do this...
+  glBindTexture(GL_TEXTURE_2D, Texture->Resources.texture1);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Texture->Width, Texture->Height, Texture->PixelFormat, GL_UNSIGNED_BYTE, (GLvoid*)Texture->Data);
+  PaintIntoScribble(Texture);
+
+  // actually do the texture with a shader thingy...
+  RenderDrawResources(Texture->Resources, Shader, ModelMatrix);
+}
+
 #define NUM_CONTROLLERS 32
 #define MAX_HATS 32
 #define MAX_AXISES 32
@@ -216,10 +283,12 @@ struct GameState
   DrawResources CubeResources;
   DrawResources PlaneResources;
   DrawResources WindowResources;
+  DrawResources ControllerResources;
   Shader* DepthTestingShader;
   bool OutlineCubes;
   bool ShowEditor;
   ControllerState Controllers[NUM_CONTROLLERS];
+  ScribbleTexture ControllerTexture;
 
   void ProcessJoystick(int JoystickNum) {
     ControllerState* Controller = &Controllers[JoystickNum];
@@ -392,6 +461,38 @@ struct GameState
         ModelMatrix = glm::translate(ModelMatrix, WindowPosition);
         RenderDrawResources(WindowResources, DepthTestingShader, ModelMatrix);
       }
+      glPopDebugGroup();
+    }
+
+    {
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, DEBUG_CONTROLLER, -1, "Controller");
+      glm::mat4 OrthoProjectionMatrix = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+      // TODO: Do we want to "follow" the camera, i.e. reposition the ortho elements relative
+      // to the camera; or set a static ortho-camera so ortho elements exist on a separate plane
+      DepthTestingShader->setMat4("projection", OrthoProjectionMatrix);
+      ViewMatrix = glm::mat4(1.0f);
+      DepthTestingShader->setMat4("view", ViewMatrix); // no camera?
+      glm::mat4 ModelMatrix = glm::mat4(1.0f);
+      ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, 0.0f, 20.0f));
+      // ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.8f, 0.8f, 1.0f));
+
+      {
+        // test the corners of the vertex...
+        glm::vec4 top_right    = glm::vec4(QuadVertices[0], QuadVertices[1], QuadVertices[2], 1.0f);
+        glm::vec4 bottom_right = glm::vec4(QuadVertices[5], QuadVertices[6], QuadVertices[7], 1.0f);
+        glm::vec4 bottom_left  = glm::vec4(QuadVertices[10], QuadVertices[11], QuadVertices[12], 1.0f);
+
+        glm::vec4 model_top_right = ModelMatrix * top_right;
+        glm::vec4 view_top_right = ViewMatrix * model_top_right;
+        glm::vec4 projection_top_right = OrthoProjectionMatrix * view_top_right;
+
+        glm::vec4 model_bottom_left = ModelMatrix * bottom_left;
+        glm::vec4 view_bottom_left = ViewMatrix * model_bottom_left;
+        glm::vec4 projection_bottom_left = OrthoProjectionMatrix * view_bottom_left;
+
+        glm::vec4 woot = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+      }
+      RenderScribble(&ControllerTexture, DepthTestingShader, ModelMatrix);
       glPopDebugGroup();
     }
 
@@ -672,7 +773,7 @@ main()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+  // glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
 
 #ifdef __linux
   glfwWindowHintString(GLFW_X11_CLASS_NAME, "Game");
@@ -787,6 +888,8 @@ main()
     std::cout << "Done compiling quad shaders" << std::endl;
   }
 
+  ScribbleTexture ControllerTexture = InitScribbleTexture(500, 500, 4, GL_RGBA);
+
   GlobalGameState.Window = Window;
   GlobalGameState.WindowState = WindowState;
   GlobalGameState.FirstMouseMove = true;
@@ -800,6 +903,7 @@ main()
   GlobalGameState.WindowResources = WindowResources;
   GlobalGameState.DepthTestingShader = &DepthTestingShader;
   GlobalGameState.ShowEditor = false;
+  GlobalGameState.ControllerTexture = ControllerTexture;
   for (int ControllerIndex = 0; ControllerIndex < NUM_CONTROLLERS; ControllerIndex++) {
     GlobalGameState.Controllers[ControllerIndex] = {};
   }
