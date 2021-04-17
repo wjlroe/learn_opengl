@@ -38,11 +38,11 @@ IF %build32% == true (
 popd
 
 IF %build32% == true (
-  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN32\include"
-  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN32\lib-vc2015"
+  set GLFW_INCLUDE_PATH="C:\dev\GLFW\glfw-3.3.4.bin.WIN32\include"
+  set GLFW_LIB_PATH="C:\dev\GLFW\glfw-3.3.4.bin.WIN32\lib-vc2019"
 ) ELSE (
-  set GLFW_INCLUDE_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN64\include"
-  set GLFW_LIB_PATH="%USERPROFILE%\Downloads\glfw-3.3.3.bin.WIN64\lib-vc2019"
+  set GLFW_INCLUDE_PATH="C:\dev\GLFW\glfw-3.3.4.bin.WIN64\include"
+  set GLFW_LIB_PATH="C:\dev\GLFW\glfw-3.3.4.bin.WIN64\lib-vc2019"
 )
 
 if not exist "%GLFW_INCLUDE_PATH%" (
@@ -55,8 +55,8 @@ if not exist "%GLFW_LIB_PATH%" (
   exit /b 1
 )
 
-set ASSIMP_INCLUDE_PATH="%USERPROFILE%\Downloads\assimp-4.1.0\include"
-set ASSIMP_LIB_PATH="%USERPROFILE%\Downloads\assimp-4.1.0\lib\Release"
+set ASSIMP_INCLUDE_PATH="C:\dev\assimp\assimp-5.0.1\include"
+set ASSIMP_LIB_PATH="C:\dev\assimp\assimp-5.0.1\lib\Release"
 
 if not exist "%ASSIMP_INCLUDE_PATH%" (
   echo Can't find assimp include path %ASSIMP_INCLUDE_PATH%
@@ -87,7 +87,7 @@ REM SET CL=/DGEN_CONVERT_ELEMENTS_FROM_VERTICES#1
 cl /std:c++17 -FC -Zc:strictStrings -Zi -EHsc -diagnostics:column %build_flags:"=% ..\src\main.cpp -I ..\include^
  -I %GLFW_INCLUDE_PATH% -I %ASSIMP_INCLUDE_PATH% -I ..\include\imgui -I ..\include\stb -I ..\include\simpleini^
  /link %GLFW_LIB_PATH%\glfw3.lib %GLFW_LIB_PATH%\glfw3dll.lib opengl32.lib^
- glu32.lib user32.lib gdi32.lib %ASSIMP_LIB_PATH%\assimp-vc140-mt.lib
+ glu32.lib user32.lib gdi32.lib %ASSIMP_LIB_PATH%\assimp-vc142-mt.lib
 IF %ERRORLEVEL% NEQ 0 SET /A errno=%ERRORLEVEL%
 popd
 
